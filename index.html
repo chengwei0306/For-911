@@ -35,6 +35,29 @@
         }
         #countdown { font-weight: bold; color: #ff007f; text-shadow: 0 0 5px #ff007f; }
         
+        /* 3D 星球搜尋終端機 UI */
+        #search-container {
+            position: absolute; bottom: 40px; left: 50%;
+            transform: translateX(-50%); z-index: 100;
+            background: rgba(5, 5, 15, 0.9);
+            border: 1px solid #00ff9d; padding: 10px 15px;
+            border-radius: 30px; box-shadow: 0 0 20px rgba(0, 255, 157, 0.2);
+            display: flex; align-items: center; width: 85%; max-width: 400px;
+        }
+        #search-input {
+            background: transparent; border: none; color: #fff;
+            font-size: 16px; width: 100%; outline: none;
+            padding: 5px; font-family: monospace;
+        }
+        #search-input::placeholder { color: rgba(0, 255, 157, 0.5); }
+        #search-btn {
+            background: #00ff9d; border: none; color: #000;
+            padding: 8px 18px; border-radius: 20px; font-weight: bold;
+            cursor: pointer; font-size: 14px; box-shadow: 0 0 10px #00ff9d;
+            white-space: nowrap;
+        }
+        #search-btn:hover { background: #fff; box-shadow: 0 0 15px #00ff9d; }
+
         /* 手機版虛擬搖桿 */
         #joystick-zone {
             position: absolute; bottom: 40px; left: 40px;
@@ -70,11 +93,16 @@
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
-            🌐 正在建立 911 多人元宇宙連線... (請部署至 GitHub Pages 以啟用多人同步)
+            🌐 正在建立 911 多人元宇宙安全連線...
         </div>
         <div class="timer-box" id="timer-box">
             距離 911 記憶大爆炸還有：<span id="countdown">00:00:00</span>
         </div>
+    </div>
+
+    <div id="search-container" class="hidden">
+        <input type="text" id="search-input" placeholder="輸入座號(如:26)或姓名定位星星...">
+        <button id="search-btn" onclick="searchMyStar()">LOCATE</button>
     </div>
 
     <div id="joystick-zone">
@@ -84,33 +112,33 @@
     <script>
         // === 0. 911 畢業班級名單與專屬祝福資料庫 ===
         const graduationData = [
-            { id: "star_01", name: "01 王群叡", wish: "畢業快樂🎉" },
-            { id: "star_03", name: "03 吳沁璇", wish: "畢業快樂🎉" },
-            { id: "star_04", name: "04 洪可芸", wish: "畢業快樂🎉" },
-            { id: "star_06", name: "06 陳俞瑾", wish: "畢業快樂🎉" },
-            { id: "star_07", name: "07 陳晏秦", wish: "畢業快樂🎉" },
-            { id: "star_08", name: "08 楊善茹", wish: "畢業快樂🎉" },
-            { id: "star_21", name: "21 丁日初", wish: "畢業快樂🎉" },
-            { id: "star_22", name: "22 王宥淵", wish: "畢業快樂🎉" },
-            { id: "star_23", name: "23 李宣毅", wish: "畢業快樂🎉" },
-            { id: "star_24", name: "24 林秉豫", wish: "畢業快樂🎉" },
-            { id: "star_25", name: "25 吳少珷", wish: "畢業快樂🎉" },
-            { id: "star_26", name: "26 林延宥", wish: "延宥！雖然只帶你半學期，但你的學習與吸收能力驚人。未來的路上保持這份自信，勇敢 Debug 你的人生藍圖吧！" },
-            { id: "star_27", name: "27 徐亦祺", wish: "畢業快樂🎉" },
-            { id: "star_28", name: "28 陳又嘉", wish: "畢業快樂🎉" },
-            { id: "star_29", name: "29 陳品聿", wish: "畢業快樂🎉" },
-            { id: "star_30", name: "30 陳彥希", wish: "畢業快樂🎉" },
-            { id: "star_31", name: "31 陳楷育", wish: "畢業快樂🎉" },
-            { id: "star_33", name: "33 陳俊穎", wish: "畢業快樂🎉" },
-            { id: "star_34", name: "34 陳謙維", wish: "畢業快樂🎉" },
-            { id: "star_35", name: "35 黃唯軒", wish: "畢業快樂🎉" },
-            { id: "star_36", name: "36 梁普恩", wish: "畢業快樂🎉" },
-            { id: "star_37", name: "37 許洺齊", wish: "洺齊！這段時間看見你的成長與轉變，老師真的很欣溫。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
-            { id: "star_38", name: "38 蔡易辰", wish: "易辰！人生不要害怕遭遇 Compile Error，每一次的挫折與挑戰，都是讓你系統變得更完美的優化擴充。祝你未來一路順暢！" },
-            { id: "star_39", name: "39 楊予寬", wish: "畢業快樂🎉" },
-            { id: "star_40", name: "40 楊淞賁", wish: "畢業快樂🎉" },
-            { id: "star_41", name: "41 劉品樂", wish: "畢業快樂🎉" },
-            { id: "star_42", name: "42 鐘蕓伸", wish: "畢業快樂🎉" }
+            { id: "star_01", seat: "01", name: "王群叡", wish: "畢業快樂🎉" },
+            { id: "star_03", seat: "03", name: "吳沁璇", wish: "畢業快樂🎉" },
+            { id: "star_04", seat: "04", name: "洪可芸", wish: "畢業快樂🎉" },
+            { id: "star_06", seat: "06", name: "陳俞瑾", wish: "畢業快樂🎉" },
+            { id: "star_07", seat: "07", name: "陳晏秦", wish: "畢業快樂🎉" },
+            { id: "star_08", seat: "08", name: "楊善茹", wish: "畢業快樂🎉" },
+            { id: "star_21", seat: "21", name: "丁日初", wish: "畢業快樂🎉" },
+            { id: "star_22", seat: "22", name: "王宥淵", wish: "畢業快樂🎉" },
+            { id: "star_23", seat: "23", name: "李宣毅", wish: "畢業快樂🎉" },
+            { id: "star_24", seat: "24", name: "林秉豫", wish: "畢業快樂🎉" },
+            { id: "star_25", seat: "25", name: "吳少珷", wish: "畢業快樂🎉" },
+            { id: "star_26", seat: "26", name: "林延宥", wish: "延宥！雖然只帶你半學期，但你的學習與吸收能力驚人。未來的路上保持這份自信，勇敢 Debug 你的人生藍圖吧！" },
+            { id: "star_27", seat: "27", name: "徐亦祺", wish: "畢業快樂🎉" },
+            { id: "star_28", seat: "28", name: "陳又嘉", wish: "畢業快樂🎉" },
+            { id: "star_29", seat: "29", name: "陳品聿", wish: "畢業快樂🎉" },
+            { id: "star_30", seat: "30", name: "陳彥希", wish: "畢業快樂🎉" },
+            { id: "star_31", seat: "31", name: "陳楷育", wish: "畢業快樂🎉" },
+            { id: "star_33", seat: "33", name: "陳俊穎", wish: "畢業快樂🎉" },
+            { id: "star_34", seat: "34", name: "陳謙維", wish: "畢業快樂🎉" },
+            { id: "star_35", seat: "35", name: "黃唯軒", wish: "畢業快樂🎉" },
+            { id: "star_36", seat: "36", name: "梁普恩", wish: "畢業快樂🎉" },
+            { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長與轉變，老師真的很欣慰。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
+            { id: "star_38", seat: "38", name: "蔡易辰", wish: "易辰！人生不要害怕遭遇 Compile Error，每一次的挫折與挑戰，都是讓你系統變得更完美的優化擴充。祝你未來一路順暢！" },
+            { id: "star_39", seat: "39", name: "楊予寬", wish: "畢業快樂🎉" },
+            { id: "star_40", seat: "40", name: "楊淞賁", wish: "畢業快樂🎉" },
+            { id: "star_41", seat: "41", name: "劉品樂", wish: "畢業快樂🎉" },
+            { id: "star_42", seat: "42", name: "鐘蕓伸", wish: "畢業快樂🎉" }
         ];
 
         const pCount = graduationData.length; 
@@ -130,7 +158,7 @@
         pointLight.position.set(0, 25, 0);
         scene.add(pointLight);
 
-        // 建立初始地圖結構
+        // 地圖結構
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ color: 0x0c0c1a, roughness: 0.85 }));
         floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
@@ -138,74 +166,49 @@
         const centerPlatform = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.6 }));
         scene.add(centerPlatform);
 
-        // === 2. 核心技術：3D 像素小人生成演算法 (取代原先的綠色方塊) ===
+        // === 2. 3D 像素小人生成演算法 ===
         function create3DHumanoid(color, isMe) {
             const group = new THREE.Group();
-
-            // 頭部 (發光發熱的小腦袋)
-            const headGeo = new THREE.BoxGeometry(1.0, 1.0, 1.0);
-            const headMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: isMe ? 0.4 : 0.1 });
-            const head = new THREE.Mesh(headGeo, headMat);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: isMe ? 0.4 : 0.1 }));
             head.position.y = 2.4;
-            group.add(head);
-
-            // 身體
-            const bodyGeo = new THREE.BoxGeometry(1.4, 1.4, 0.8);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.5 });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 0.8), new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.5 }));
             body.position.y = 1.4;
-            group.add(body);
+            group.add(head, body);
 
-            // 雙手
             const armMat = new THREE.MeshStandardMaterial({ color: color });
-            const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.4), armMat);
-            leftArm.position.set(-0.9, 1.4, 0);
-            const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.4), armMat);
-            rightArm.position.set(0.9, 1.4, 0);
+            const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.4), armMat); leftArm.position.set(-0.9, 1.4, 0);
+            const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.4), armMat); rightArm.position.set(0.9, 1.4, 0);
             group.add(leftArm, rightArm);
 
-            // 雙腳
             const legMat = new THREE.MeshStandardMaterial({ color: 0x111115 });
-            const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), legMat);
-            leftLeg.position.set(-0.4, 0.4, 0);
-            const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), legMat);
-            rightLeg.position.set(0.4, 0.4, 0);
+            const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), legMat); leftLeg.position.set(-0.4, 0.4, 0);
+            const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), legMat); rightLeg.position.set(0.4, 0.4, 0);
             group.add(leftLeg, rightLeg);
-
             return group;
         }
 
-        // 建立「自己」的 3D 小人 (經典科技綠)
         const player = create3DHumanoid(0x00ff9d, true);
         player.position.set((Math.random()-0.5)*30, 0, (Math.random()-0.5)*30);
         scene.add(player);
 
-        // === 3. 多人即時連線控制 (PubNub) ===
+        // === 3. 完美更換：911 專屬獨立安全網路連線通道 (PubNub) ===
         const myID = "911_" + Math.floor(Math.random() * 10000);
         const otherPlayers = {};
 
         const pubnub = new PubNub({
-            publishKey: 'pub-c-e03f3224-0b05-434d-9cde-0d3b6f9fe21e', //pub-c-8be92bd3-2ea4-4866-9df3-010bd71a3983
-            subscribeKey: 'sub-c-f345f486-d14d-40b4-b8a7-168bc3d87fa9',//sub-c-e1cf80fe-fc9d-11e8-a72a-9e11ebaa642c
+            publishKey: 'pub-c-e03f3224-0b05-434d-9cde-0d3b6f9fe21e', 
+            subscribeKey: 'sub-c-f345f486-d14d-40b4-b8a7-168bc3d87fa9',
             userId: myID
-
-            
-
-
         });
 
-        // 監聽其他同學
         pubnub.addListener({
             message: function(event) {
                 const data = event.message;
                 if (data.id !== myID && blastStage === 0) {
-                    // 如果看見新同學，立刻幫他建一個 3D 小人
                     if (!otherPlayers[data.id]) {
-                        const randomColor = Math.random() * 0xffffff;
-                        otherPlayers[data.id] = create3DHumanoid(randomColor, false);
+                        otherPlayers[data.id] = create3DHumanoid(Math.random() * 0xffffff, false);
                         scene.add(otherPlayers[data.id]);
                     }
-                    // 同步位置與轉向
                     otherPlayers[data.id].position.set(data.x, data.y, data.z);
                     otherPlayers[data.id].rotation.y = data.ry;
                 }
@@ -219,9 +222,9 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        document.getElementById('announcement').innerHTML = "🌐 911 虛擬教室已就緒。<br>使用 鍵盤WASD 或 左下角搖桿 控制 3D 小人移動！";
+        document.getElementById('announcement').innerHTML = "🌐 911 專屬私密頻道連線成功！<br>使用 鍵盤WASD 或 左下角搖桿 控制 3D 小人移動。";
 
-        // === 4. 位移控制系統 ===
+        // === 4. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
         window.addEventListener('keydown', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = 1; });
         window.addEventListener('keyup', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = 0; });
@@ -233,24 +236,19 @@
         joystickZone.addEventListener('touchmove', (e) => {
             const rect = joystickZone.getBoundingClientRect();
             const touch = e.touches[0];
-            let fx = touch.clientX - (rect.left + 55);
-            let fy = touch.clientY - (rect.top + 55);
+            let fx = touch.clientX - (rect.left + 55); let fy = touch.clientY - (rect.top + 55);
             const dist = Math.sqrt(fx*fx + fy*fy);
             if(dist > 35) { fx = (fx/dist)*35; fy = (fy/dist)*35; }
             joystickStick.style.transform = `translate(${fx}px, ${fy}px)`;
             moveDir.x = fx / 35; moveDir.z = fy / 35;
         }, { passive: true });
 
-        joystickZone.addEventListener('touchend', () => {
-            joystickStick.style.transform = `translate(0px, 0px)`;
-            moveDir = { x: 0, z: 0 };
-        });
+        joystickZone.addEventListener('touchend', () => { joystickStick.style.transform = `translate(0px, 0px)`; moveDir = { x: 0, z: 0 }; });
 
         let lastBroadcast = 0;
         function updateMovement() {
             if (blastStage > 0) return;
-            let isMoving = false;
-            let targetRotation = player.rotation.y;
+            let isMoving = false; let targetRotation = player.rotation.y;
 
             if(keys.w) { player.position.z -= 0.35; targetRotation = Math.PI; isMoving = true; }
             if(keys.s) { player.position.z += 0.35; targetRotation = 0; isMoving = true; }
@@ -258,48 +256,33 @@
             if(keys.d) { player.position.x += 0.35; targetRotation = Math.PI/2; isMoving = true; }
             
             if(moveDir.x !== 0 || moveDir.z !== 0) {
-                player.position.x += moveDir.x * 0.35;
-                player.position.z += moveDir.z * 0.35;
-                targetRotation = Math.atan2(moveDir.x, moveDir.z);
-                isMoving = true;
+                player.position.x += moveDir.x * 0.35; player.position.z += moveDir.z * 0.35;
+                targetRotation = Math.atan2(moveDir.x, moveDir.z); isMoving = true;
             }
 
-            // 讓小人平滑轉向移動方向
             player.rotation.y = targetRotation;
-
-            // 相機跟隨
             camera.position.set(player.position.x, player.position.y + 9, player.position.z + 16);
             camera.lookAt(player.position);
 
-            // 廣播給全班
             const now = performance.now();
             if (isMoving && now - lastBroadcast > 50) {
-                pubnub.publish({
-                    channel: 'class_911_metaverse',
-                    message: { id: myID, x: player.position.x, y: player.position.y, z: player.position.z, ry: player.rotation.y }
-                });
+                pubnub.publish({ channel: 'class_911_metaverse', message: { id: myID, x: player.position.x, y: player.position.y, z: player.position.z, ry: player.rotation.y } });
                 lastBroadcast = now;
             }
         }
 
         // === 5. 排程時間與大爆炸重構演算法 ===
+        // 倒數計時點設定在 2026年6月19日 晚上 20:00:00
         const targetTime = new Date("June 19, 2026 20:00:00").getTime(); 
-        let blastStage = 0; 
-        let fireworkParticles;
-        let starSphereGroup = new THREE.Group(); 
-        scene.add(starSphereGroup);
-        const spherePositions = [];
-        const velocities = [];
+        let blastStage = 0; let fireworkParticles;
+        let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
+        const spherePositions = []; const velocities = [];
 
         function updateTimeline() {
             if (blastStage > 0) return;
-            const now = new Date().getTime();
-            const distance = targetTime - now;
-
-            if (distance <= 0) {
-                document.getElementById('countdown').innerText = "00:00:00";
-                triggerMemoryBlast();
-            } else {
+            const now = new Date().getTime(); const distance = targetTime - now;
+            if (distance <= 0) { triggerMemoryBlast(); } 
+            else {
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
@@ -311,46 +294,32 @@
             if(blastStage > 0) return;
             blastStage = 1;
             
-            // 隱藏倒數與控制UI
             document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('joystick-zone').classList.add('hidden');
             if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
 
-            // 徹底摧毀世界物件
             scene.children = scene.children.filter(c => c === starSphereGroup || c.type === "AmbientLight" || c.type === "PointLight");
+            document.getElementById('announcement').innerHTML = "💥 【911 數據大爆炸】記憶原子重組升維中...";
 
-            const announceBox = document.getElementById('announcement');
-            announceBox.style.borderColor = "#ff007f";
-            announceBox.innerHTML = "💥 【911 數據大爆炸】正在將記憶原子重組為星河...";
-
-            // 建立爆炸粒子系統
-            const geom = new THREE.BufferGeometry();
-            const currentPositions = [];
-            const colors = [];
-
-            for (let i = 0; i < 400; i++) {
+            const geom = new THREE.BufferGeometry(); const currentPositions = []; const colors = [];
+            for (let i = 0; i < pCount; i++) {
                 currentPositions.push(0, 18, 0);
                 velocities.push((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4);
                 
-                // 計算星盤球面坐標
-                const radius = 22;
-                const u = Math.random(); const v = Math.random();
+                const radius = 22; const u = Math.random(); const v = Math.random();
                 const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
                 spherePositions.push(radius * Math.sin(phi) * Math.cos(theta), radius * Math.sin(phi) * Math.sin(theta) + 18, radius * Math.cos(phi));
                 colors.push(0.0, 1.0, 0.61); 
             }
-
             geom.setAttribute('position', new THREE.Float32BufferAttribute(currentPositions, 3));
             geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
             
             fireworkParticles = new THREE.Points(geom, new THREE.PointsMaterial({ size: 0.8, vertexColors: true, transparent: true, opacity: 1.0 }));
             scene.add(fireworkParticles);
 
-            // 2.5 秒後引力凝聚成自轉星球
             setTimeout(() => {
-                blastStage = 2;
-                scene.remove(fireworkParticles);
-                buildMemorySphere();
+                blastStage = 2; scene.remove(fireworkParticles); buildMemorySphere();
+                document.getElementById('search-container').classList.remove('hidden'); 
             }, 2500);
         }
 
@@ -358,112 +327,123 @@
         const starMeshes = [];
         function buildMemorySphere() {
             starSphereGroup.position.set(0, 18, 0);
-            document.getElementById('announcement').innerHTML = "✨【911 記憶星球】重構成功！<br>👉 用手指/滑鼠「滑動旋轉星空」，點擊發光的星星解鎖老師的卡片！";
+            document.getElementById('announcement').innerHTML = "✨【911 記憶星球】重構成功！<br>👉 下方輸入『座號』或『姓名』，全自動 3D 雷射追蹤你的回憶之星！";
 
             graduationData.forEach((student, index) => {
                 const idx = index * 3;
-                // 每位同學是一顆水晶幾何體星星
                 const starGeo = new THREE.IcosahedronGeometry(0.7, 0); 
-                const starMat = new THREE.MeshStandardMaterial({ 
-                    color: 0x00ff9d, 
-                    emissive: 0x00ff9d, 
-                    emissiveIntensity: 0.8,
-                    roughness: 0.1
-                });
+                const starMat = new THREE.MeshStandardMaterial({ color: 0x00ff9d, emissive: 0x00ff9d, emissiveIntensity: 0.8, roughness: 0.1 });
                 const mesh = new THREE.Mesh(starGeo, starMat);
-                
-                // 如果陣列越界則給予隨機座標
-                if(spherePositions[idx]) {
-                    mesh.position.set(spherePositions[idx], spherePositions[idx+1] - 18, spherePositions[idx+2]);
-                } else {
-                    mesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20);
-                }
+                mesh.position.set(spherePositions[idx], spherePositions[idx+1] - 18, spherePositions[idx+2]);
                 
                 mesh.userData = { studentInfo: student };
                 starSphereGroup.add(mesh);
                 starMeshes.push(mesh);
             });
+            resetCamera();
+        }
 
+        function resetCamera() {
             camera.position.set(0, 18, 52);
             camera.lookAt(0, 18, 0);
         }
 
-        // 滑動與慣性自轉
+        // 3D 鏡頭自動定位搜尋演算法
+        let isTrackingCamera = false;
+        let camTargetPos = new THREE.Vector3();
+
+        function searchMyStar() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            if(!query) return alert("請輸入座號或姓名！");
+
+            const targetStar = starMeshes.find(star => {
+                const info = star.userData.studentInfo;
+                return info.seat.includes(query) || info.name.toLowerCase().includes(query);
+            });
+
+            if (targetStar) {
+                const info = targetStar.userData.studentInfo;
+                const worldPos = new THREE.Vector3();
+                targetStar.getWorldPosition(worldPos);
+
+                const direction = new THREE.Vector3().subVectors(worldPos, new THREE.Vector3(0, 18, 0)).normalize();
+                camTargetPos.copy(worldPos).add(direction.multiplyScalar(10)); 
+
+                targetStar.material.color.setHex(0xff007f);
+                targetStar.material.emissive.setHex(0xff007f);
+                targetStar.scale.set(2.5, 2.5, 2.5);
+
+                isTrackingCamera = true;
+                isUserInteracting = true; 
+
+                setTimeout(() => {
+                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\n資訊老師心裡話：\n${info.wish}`);
+                    targetStar.scale.set(1, 1, 1);
+                    targetStar.material.color.setHex(0x00ff9d);
+                    targetStar.material.emissive.setHex(0x00ff9d);
+                    isTrackingCamera = false;
+                    isUserInteracting = false;
+                    resetCamera();
+                }, 1500); 
+
+            } else {
+                alert("找不到對應的同學，請檢查輸入是否正確（例如：26）");
+            }
+        }
+
+        // 滑動旋轉
         let isDragging = false; let prevMousePosition = { x: 0, y: 0 }; let isUserInteracting = false;
-        
-        function dragStart(x, y) { isDragging = true; prevMousePosition = { x, y }; }
+        function dragStart(x, y) { if(isTrackingCamera) return; isDragging = true; prevMousePosition = { x, y }; }
         function dragMove(x, y) {
             if (!isDragging || blastStage !== 2) return;
-            const deltaX = x - prevMousePosition.x;
-            const deltaY = y - prevMousePosition.y;
-            starSphereGroup.rotation.y += deltaX * 0.005;
-            starSphereGroup.rotation.x += deltaY * 0.005;
-            isUserInteracting = true;
-            prevMousePosition = { x, y };
+            starSphereGroup.rotation.y += (x - prevMousePosition.x) * 0.005;
+            starSphereGroup.rotation.x += (y - prevMousePosition.y) * 0.005;
+            isUserInteracting = true; prevMousePosition = { x, y };
         }
-        function dragEnd() { isDragging = false; setTimeout(() => { isUserInteracting = false; }, 2000); }
+        function dragEnd() { isDragging = false; setTimeout(() => { if(!isTrackingCamera) isUserInteracting = false; }, 2000); }
 
         window.addEventListener('mousedown', (e) => dragStart(e.clientX, e.clientY));
         window.addEventListener('mousemove', (e) => dragMove(e.clientX, e.clientY));
         window.addEventListener('mouseup', dragEnd);
-
         window.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
         window.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
         window.addEventListener('touchend', dragEnd);
 
-        // 高精準射線拾取 (Raycaster)
+        // 手動點擊同樣支援
         const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-
-        function checkClick(clientX, clientY) {
-            // 關鍵限制：只有在星球凝聚完成（階段 2）才能點擊星星，避免倒數時誤觸
-            if (blastStage !== 2) return;
-
-            mouse.x = (clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-
+        window.addEventListener('click', (e) => {
+            if (blastStage !== 2 || isTrackingCamera || e.target.id === "search-input" || e.target.id === "search-btn") return;
+            const mouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(starMeshes);
-
             if (intersects.length > 0) {
-                const star = intersects[0].object;
-                const info = star.userData.studentInfo;
-                
-                // 高亮點擊特效
-                star.material.color.setHex(0xff007f);
-                star.material.emissive.setHex(0xff007f);
-                star.scale.set(2.0, 2.0, 2.0);
-                setTimeout(() => { star.scale.set(1,1,1); star.material.color.setHex(0x00ff9d); star.material.emissive.setHex(0x00ff9d); }, 1000);
-
-                // 跳出專屬卡片視窗
-                setTimeout(() => {
-                    alert(`🌟【911 ${info.name} 的回憶結晶】🌟\n\n資訊老師心裡話：\n${info.wish}`);
-                }, 50);
+                document.getElementById('search-input').value = intersects[0].object.userData.studentInfo.seat;
+                searchMyStar();
             }
-        }
-        window.addEventListener('click', (e) => checkClick(e.clientX, e.clientY));
+        });
 
-        // === 7. 動力學渲染渲染循環 ===
+        // === 7. 動力學渲染與循環 ===
         function animate() {
             requestAnimationFrame(animate);
             updateMovement();
             updateTimeline();
 
-            // 爆炸粒子軌跡動畫
             if (blastStage === 1 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 for (let i = 0; i < posArr.length / 3; i++) {
-                    posArr[i*3] += velocities[i*3];
-                    posArr[i*3+1] += velocities[i*3+1];
-                    posArr[i*3+2] += velocities[i*3+2];
+                    posArr[i*3] += velocities[i*3]; posArr[i*3+1] += velocities[i*3+1]; posArr[i*3+2] += velocities[i*3+2];
                     velocities[i*3] *= 0.97; velocities[i*3+1] *= 0.97; velocities[i*3+2] *= 0.97;
                 }
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
             }
 
-            // 星球慢速自動運轉
+            if (isTrackingCamera) {
+                camera.position.lerp(camTargetPos, 0.08); 
+                camera.lookAt(0, 18, 0);
+            }
+
             if (blastStage === 2 && !isUserInteracting) {
-                starSphereGroup.rotation.y += 0.002;
+                starSphereGroup.rotation.y += 0.0025;
             }
 
             renderer.render(scene, camera);
@@ -471,9 +451,7 @@
         animate();
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
 </body>
