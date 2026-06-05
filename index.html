@@ -171,7 +171,7 @@
             { id: "star_34", seat: "34", name: "陳謙維", wish: "畢業快樂🎉" },
             { id: "star_35", seat: "35", name: "黃唯軒", wish: "畢業快樂🎉" },
             { id: "star_36", seat: "36", name: "梁普恩", wish: "畢業快樂🎉" },
-            { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長與轉變，老師真的很欣慰。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
+            { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長，老師真的覺得你是有潛力的一顆星。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
             { id: "star_38", seat: "38", name: "蔡易辰", wish: "易辰！人生不要害怕遭遇 Compile Error，每一次的挫折與挑戰，都是讓你系統變得更完美的優化擴充。祝你未來一路順暢！" },
             { id: "star_39", seat: "39", name: "楊予寬", wish: "畢業快樂🎉" },
             { id: "star_40", seat: "40", name: "楊淞賁", wish: "畢業快樂🎉" },
@@ -182,7 +182,7 @@
         const pCount = graduationData.length; 
 
         // 🚀 老師可以在這裡自由修改大爆炸後想對全班講的感言話語 (\n 代表換行)
-        const teacherSpeech = "⚡ [911 核心通訊端已建立]...\n\n雖然只帶了你們短短半學期，\n但你們這群孩子的活力，已經寫進了我的核心記憶體中。\n\n人生這場程式碼，難免遇到 Compile Error 或 Bug，\n但請記住，每次的挫折，都是系統優化的重磅契機。\n\n勇敢地去編寫屬於你們自己的未來吧！\n畢業快樂！\n\n—— 生科老師 ＠chengwei_2232 2026.06.09";
+        const teacherSpeech = "⚡ [911 核心通訊端已建立]...\n\n雖然只帶了你們短短半學期，\n但你們這群孩子的活力，已經寫進了我的核心記憶體中。\n\n人生這場程式碼，難免遇到 Compile Error 或 Bug，\n但請記住，每次的挫折，都是系統優化的重磅契機。\n\n勇敢地去編寫屬於你們自己的未來吧！\n畢業快樂！\n\n—— 生科老師 ＠chengwei_2232 \n2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
@@ -342,8 +342,8 @@
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
         // 🚀 測試時間精準綁定在今晚 22:00:00 
-        const targetTime = new Date("June 5, 2026 23:50:00").getTime(); 
-        const duskStartTime = new Date("June 5, 2026 23:47:00").getTime();
+        const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
+        const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; // 0: 倒數中, 1: 大爆炸噴發中, 2: 打字機留言展示中, 3: 緩緩凝聚收縮中, 4: 星球建構完成自轉
         let fireworkParticles;
