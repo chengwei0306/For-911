@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>911 元宇宙：終焉星河</title>
+    <title>911 3D 大安元宇宙：終焉星河</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -23,7 +23,7 @@
             transition: background 0.5s ease;
         }
 
-        /* 🚀 硬核技術：全螢幕打字機黑客幕 */
+        /* 全螢幕打字機黑客幕 */
         #typewriter-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 50; background: rgba(2, 2, 8, 0.95);
@@ -36,7 +36,7 @@
             white-space: pre-wrap; word-break: break-all;
             max-width: 500px; width: 100%; text-align: left;
             text-shadow: 0 0 8px rgba(0, 255, 157, 0.5);
-            border-right: 2px solid #00ff9d; /* 閃爍游標效果 */
+            border-right: 2px solid #00ff9d; 
             animation: blink 0.8s infinite;
         }
         @keyframes blink { 50% { border-color: transparent; } }
@@ -125,15 +125,15 @@
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
-            🌐 正在建立 911 元宇宙安全連線...
+            🌐 正在建立 911 大安元宇宙安全連線...
         </div>
         <div class="timer-box" id="timer-box">
-            距離記憶煙火爆炸還有：<span id="countdown">00:00:00</span>
+            距離大安新大樓記憶爆炸還有：<span id="countdown">00:00:00</span>
         </div>
     </div>
 
     <div id="search-container" class="hidden">
-        <input type="text" id="search-input" placeholder="輸入座號(如:01)或姓名定位星星...">
+        <input type="text" id="search-input" placeholder="輸入座號(如:26)或姓名定位星星...">
         <button id="search-btn" onclick="searchMyStar()">LOCATE</button>
     </div>
 
@@ -143,9 +143,9 @@
 
     <script>
         // === 0.0 進入網頁前問姓名座號 ===
-        let myUsername = prompt("【911 畢業限定】請輸入你的座號或名字或綽號", "");
+        let myUsername = prompt("【911 畢業限定】請輸入你的座號與名字 (例如: 26 林延宥)", "");
         if(!myUsername || myUsername.trim() === "") {
-            myUsername = "匿名人_" + Math.floor(Math.random() * 900 + 100);
+            myUsername = "匿名大安人_" + Math.floor(Math.random() * 900 + 100);
         }
 
         // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
@@ -171,7 +171,7 @@
             { id: "star_34", seat: "34", name: "陳謙維", wish: "畢業快樂🎉" },
             { id: "star_35", seat: "35", name: "黃唯軒", wish: "畢業快樂🎉" },
             { id: "star_36", seat: "36", name: "梁普恩", wish: "畢業快樂🎉" },
-            { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長，老師真的覺得你是有潛力的一顆星。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
+            { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長與轉變，老師真的很欣慰。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
             { id: "star_38", seat: "38", name: "蔡易辰", wish: "易辰！人生不要害怕遭遇 Compile Error，每一次的挫折與挑戰，都是讓你系統變得更完美的優化擴充。祝你未來一路順暢！" },
             { id: "star_39", seat: "39", name: "楊予寬", wish: "畢業快樂🎉" },
             { id: "star_40", seat: "40", name: "楊淞賁", wish: "畢業快樂🎉" },
@@ -181,18 +181,17 @@
 
         const pCount = graduationData.length; 
 
-        // 🚀 老師可以在這裡自由修改大爆炸後想對全班講的感言話語 (\n 代表換行)
-        const teacherSpeech = "⚡ [911 核心通訊端已建立]...\n\n雖然只帶了你們短短半學期，\n但你們這群孩子的活力，已經寫進了我的核心記憶體中。\n\n人生這場程式碼，難免遇到 Compile Error 或 Bug，\n但請記住，每次的挫折，都是系統優化的重磅契機。\n\n勇敢地去編寫屬於你們自己的未來吧！\n畢業快樂！\n\n—— 生科老師 ＠chengwei_2232 \n2026.06.09";
+        // 老師對全班講的感言
+        const teacherSpeech = "⚡ [911 核心通訊端已建立]...\n\n雖然只帶了你們短短半學期，\n但你們這群孩子的活力，已經寫進了我的核心記憶體中。\n\n人生這場程式碼，難免遇到 Compile Error 或 Bug，\n但請記住，每次的挫折，都是系統優化的重磅契機。\n\n勇敢地去編寫屬於你們自己的未來吧！\n畢業快樂！\n\n—— 資訊老師 2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
         
-        // 載入大安國中新大樓背景
+        // 讀取你倉庫裡的 daan.png 背景
         const textureLoader = new THREE.TextureLoader();
-        textureLoader.load('daan.jpeg', function(texture) {
+        textureLoader.load('daan.png', function(texture) {
             scene.background = texture; 
         }, undefined, function(err) {
-            // 如果你圖片附檔名是 .jpg，記得把上面 'daan.png' 改成 'daan.jpg'
             scene.background = new THREE.Color(0x0e0e1a);
         });
 
@@ -278,7 +277,8 @@
                 const data = event.message;
                 if (data.id !== myID && blastStage === 0) {
                     if (!otherPlayers[data.id]) {
-                        otherPlayers[data.id] = create3DHumanoid(Math.random() * 0xffffff, false, data.name);
+                        const randomColor = Math.random() * 0xffffff;
+                        otherPlayers[data.id] = create3DHumanoid(randomColor, false, data.name);
                         scene.add(otherPlayers[data.id]);
                     }
                     otherPlayers[data.id].position.set(data.x, data.y, data.z);
@@ -293,7 +293,7 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        document.getElementById('announcement').innerHTML = `🏫 歡迎 <b>${myUsername}</b> 進入911元宇宙空間。`;
+        document.getElementById('announcement').innerHTML = `🏫 歡迎 <b>${myUsername}</b> 進入大安元宇宙空間。`;
 
         // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
@@ -340,12 +340,11 @@
             }
         }
 
-        // === 6. 排程時間與天色變黑遮罩系統 ===
-        // 🚀 測試時間精準綁定在今晚 22:00:00 
+        // === 6. 核心修改：排程時間精準定位在 2026/06/09 晚上 22:00:00 ===
         const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
-        const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
+        const duskStartTime = new Date("June 9, 2026 21:00:00").getTime(); // 爆炸前一小時天色開始變黑
 
-        let blastStage = 0; // 0: 倒數中, 1: 大爆炸噴發中, 2: 打字機留言展示中, 3: 緩緩凝聚收縮中, 4: 星球建構完成自轉
+        let blastStage = 0; 
         let fireworkParticles;
         let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
         const spherePositions = []; const velocities = [];
@@ -355,6 +354,7 @@
             if (blastStage > 0) return;
             const now = new Date().getTime(); const distance = targetTime - now;
 
+            // 驅動天色與遮罩變暗
             if (now >= duskStartTime) {
                 const totalDuskDuration = targetTime - duskStartTime;
                 const darknessRatio = Math.min(((now - duskStartTime) / totalDuskDuration) * 0.92, 0.92);
@@ -374,7 +374,6 @@
             document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
         }
 
-        // 階段一：漫天煙火大爆炸
         function triggerMemoryBlast() {
             if(blastStage > 0) return;
             blastStage = 1;
@@ -394,7 +393,8 @@
             document.getElementById('announcement').innerHTML = "💥 【911 記憶大爆炸】核心數據解構中...";
 
             const geom = new THREE.BufferGeometry(); const currentPositions = []; const colors = [];
-            for (let i = 0; i < 600; i++) {
+            const particleDensity = 600;
+            for (let i = 0; i < particleDensity; i++) {
                 currentPositions.push(0, 18, 0);
                 velocities.push((Math.random() - 0.5) * 6.5, (Math.random() - 0.5) * 6.5, (Math.random() - 0.5) * 6.5);
                 
@@ -408,18 +408,17 @@
             fireworkParticles = new THREE.Points(geom, new THREE.PointsMaterial({ size: 0.9, vertexColors: true, transparent: true, opacity: 1.0 }));
             scene.add(fireworkParticles);
 
-            // 🚀 1.5 秒煙火放得最燦爛時，無縫切換進入「階段二：打字機公告畫面」
             setTimeout(() => {
                 blastStage = 2;
                 startTypewriterEffect();
             }, 1500);
         }
 
-        // 🚀 階段二：黑客終端機打字機核心演算法
+        // 打字機特效
         function startTypewriterEffect() {
             const screen = document.getElementById('typewriter-screen');
             const textBox = document.getElementById('typewriter-text');
-            screen.classList.remove('hidden'); // 秀出黑幕
+            screen.classList.remove('hidden'); 
             
             let index = 0;
             textBox.innerText = "";
@@ -428,16 +427,14 @@
                 if (index < teacherSpeech.length) {
                     textBox.innerText += teacherSpeech.charAt(index);
                     index++;
-                    // 控制打字機速度 (每 45 毫秒敲一個字，極具節奏感)
-                    setTimeout(type, 80); 
+                    setTimeout(type, 45); // 可以在這裡微調打字速度
                 } else {
-                    // 字全部打完後，原地停留 3.5 秒供學生細細閱讀，隨後進入「階段三：緩緩收縮凝聚」
                     setTimeout(() => {
                         screen.style.transition = "opacity 1s ease";
                         screen.style.opacity = 0;
                         setTimeout(() => {
                             screen.classList.add('hidden');
-                            blastStage = 3; // 啟動收縮
+                            blastStage = 3; 
                             document.getElementById('announcement').innerHTML = "✨ 【引力反轉】所有回憶原子正受到重力牽引，緩緩收縮凝聚中...";
                         }, 1000);
                     }, 3500);
@@ -446,7 +443,7 @@
             type();
         }
 
-        // 階段四：記憶星球高階互動系統
+        // 建立記憶星球
         const starMeshes = [];
         function buildMemorySphere() {
             starSphereGroup.position.set(0, 18, 0);
@@ -528,13 +525,13 @@
             }
         });
 
-        // === 8. 動力學核心矩陣控制循環 ===
+        // === 8. 動力學核心循環 ===
         function animate() {
             requestAnimationFrame(animate);
             updateMovement();
             updateTimeline();
 
-            // 狀態 1：大爆炸噴發擴散運動
+            // 狀態 1：大爆炸
             if (blastStage === 1 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 for (let i = 0; i < posArr.length / 3; i++) {
@@ -544,7 +541,7 @@
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
             }
 
-            // 狀態 2：打字機留言期間，煙火粒子在空中微弱微幅漂浮凍結，製造極致唯美星空背景
+            // 狀態 2：打字機漂浮
             if (blastStage === 2 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 for (let i = 0; i < posArr.length / 3; i++) {
@@ -553,21 +550,19 @@
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
             }
 
-            // 狀態 3：打字機關閉後，啟動物理公式「緩緩凝聚收縮」
+            // 狀態 3：緩緩凝聚收縮
             if (blastStage === 3 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 gatherProgress += 0.005; 
 
                 for (let i = 0; i < posArr.length / 3; i++) {
                     const idx = i * 3;
-                    // 將每顆粒子平滑流暢地吸向未來的球面位置
                     posArr[idx] += (spherePositions[idx] - posArr[idx]) * 0.045;
                     posArr[idx+1] += (spherePositions[idx+1] - posArr[idx+1]) * 0.045;
                     posArr[idx+2] += (spherePositions[idx+2] - posArr[idx+2]) * 0.045;
                 }
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
 
-                // 收縮完畢，秒速切換到「狀態 4：星球正式激活自轉」並秀出搜尋框
                 if(gatherProgress >= 1.0) {
                     blastStage = 4;
                     scene.remove(fireworkParticles);
