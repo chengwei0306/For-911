@@ -121,7 +121,7 @@
         <div id="typewriter-text"></div>
     </div>
 
-    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
+    <!-- <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button> -->
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
@@ -181,7 +181,7 @@
 
         const pCount = graduationData.length; 
 
-        const teacherSpeech = "⚡ [911 棋局核心通訊已建立]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 ＠chengwei_2232 \n2026.06.09";
+        const teacherSpeech = "⚡ [911 核心通訊已連接]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n ＠chengwei_2232 \n2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
@@ -387,7 +387,7 @@
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
         // 固定在 2026/06/09 22:00:00 準時自動大爆炸
-        const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
+        const targetTime = new Date("June 6, 2026 00:35:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; let fireworkParticles;
@@ -477,7 +477,7 @@
                         setTimeout(() => {
                             screen.classList.add('hidden');
                             blastStage = 3; 
-                            document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】黑白回憶子正緩緩凝聚為星球...";
+                            document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】回憶正緩緩凝聚為星球...";
                         }, 1000);
                     }, 3500);
                 }
