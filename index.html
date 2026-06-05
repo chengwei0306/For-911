@@ -189,9 +189,10 @@
         
         // 載入大安國中新大樓背景
         const textureLoader = new THREE.TextureLoader();
-        textureLoader.load('https://upload.wikimedia.org/wikipedia/commons/e/ec/Daan_Junior_High_School_New_Building.png', function(texture) {
+        textureLoader.load('daan.png', function(texture) {
             scene.background = texture; 
         }, undefined, function(err) {
+            // 如果你圖片附檔名是 .jpg，記得把上面 'daan.png' 改成 'daan.jpg'
             scene.background = new THREE.Color(0x0e0e1a);
         });
 
