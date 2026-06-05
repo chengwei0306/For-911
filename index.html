@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>911 3D 元宇宙：終焉星河</title>
+    <title>911 3D 大安元宇宙：終焉星河</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -14,6 +14,15 @@
         #webgl-stage {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
         }
+        
+        /* 核心黑科技：天色變黑動態遮罩層 (由倒數計時即時計算 opacity) */
+        #sky-mask {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; background: rgba(0, 0, 0, 0);
+            pointer-events: none; /* 穿透點擊，不干擾 3D 控制 */
+            transition: background 0.5s ease;
+        }
+
         #ui-container {
             position: absolute; top: 20px; left: 50%;
             transform: translateX(-50%); z-index: 10;
@@ -88,15 +97,17 @@
 <body>
 
     <canvas id="webgl-stage"></canvas>
+    
+    <div id="sky-mask"></div>
 
     <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
-            🌐 正在建立 911 多人元宇宙安全連線...
+            🌐 正在建立 911 大安元宇宙安全連線...
         </div>
         <div class="timer-box" id="timer-box">
-            距離 911 記憶大爆炸還有：<span id="countdown">00:00:00</span>
+            距離大安新大樓記憶爆炸還有：<span id="countdown">00:00:00</span>
         </div>
     </div>
 
@@ -145,7 +156,17 @@
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020206);
+        
+        // 核心修改：利用大安國中全新落成綜合教學大樓的真實影像當作背景貼圖！
+        const textureLoader = new THREE.TextureLoader();
+        // 這裡直接讀取上傳的大安新大樓模擬透視景觀照片
+        textureLoader.load('https://upload.wikimedia.org/wikipedia/commons/e/ec/Daan_Junior_High_School_New_Building.png', function(texture) {
+            scene.background = texture; 
+        }, undefined, function(err) {
+            // 備用防掛機制：如果載入失敗，則呈現高質感夜空色
+            scene.background = new THREE.Color(0x0e0e1a);
+        });
+
         scene.fog = new THREE.FogExp2(0x020206, 0.015);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -153,12 +174,14 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        // 建立初始環境光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
         const pointLight = new THREE.PointLight(0x00ff9d, 2, 300);
         pointLight.position.set(0, 25, 0);
         scene.add(pointLight);
 
-        // 地圖結構
+        // 網格地面與大安圓台
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ color: 0x0c0c1a, roughness: 0.85 }));
         floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
@@ -191,7 +214,7 @@
         player.position.set((Math.random()-0.5)*30, 0, (Math.random()-0.5)*30);
         scene.add(player);
 
-        // === 3. 911 專屬私密網路連線通道 (PubNub) ===
+        // === 3. 911 專屬私密連線通道 (PubNub) ===
         const myID = "911_" + Math.floor(Math.random() * 10000);
         const otherPlayers = {};
 
@@ -222,7 +245,7 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        document.getElementById('announcement').innerHTML = "🌐 911 專屬私密頻道連線成功！<br>使用 鍵盤WASD 或 左下角搖桿 控制 3D 小人移動。";
+        document.getElementById('announcement').innerHTML = "🏫 歡迎來到大安國中 911 元宇宙空間！<br>使用 鍵盤WASD 或 虛擬搖桿 控制 3D 小人移動。";
 
         // === 4. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
@@ -271,9 +294,12 @@
             }
         }
 
-        // === 5. 排程時間與高強健引爆機制 ===
-        // 🛠️ 實驗模式：時間設定在今天 6 月 5 日 23:58:00
-        const targetTime = new Date("June 5, 2026 23:04:00").getTime(); 
+        // === 5. 核心修改：22:00 排程時間與「天色漸進黑幕遮罩演算法」 ===
+        // 🚀 預計在今晚 22:00:00 準時大爆炸
+        const targetTime = new Date("June 5, 2026 22:00:00").getTime(); 
+        // 為了讓遮罩平滑，我們定義「黃昏變黑開始計算的起點時間」（例如爆炸前 1 小時，也就是 21:00）
+        const duskStartTime = new Date("June 5, 2026 21:00:00").getTime();
+
         let blastStage = 0; let fireworkParticles;
         let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
         const spherePositions = []; const velocities = [];
@@ -283,6 +309,19 @@
             if (blastStage > 0) return;
             const now = new Date().getTime(); 
             const distance = targetTime - now;
+
+            // 🛠️ 核心黑科技：計算距離 22:00 的進度，驅動網頁天色逐漸變黑
+            if (now >= duskStartTime) {
+                const totalDuskDuration = targetTime - duskStartTime;
+                const elapseddusk = now - duskStartTime;
+                // 計算出 0 到 0.92 之間的暗度比率 (留下 0.08 讓底圖隱約可見，營造極致暴風雨前的寧靜)
+                const darknessRatio = Math.min((elapseddusk / totalDuskDuration) * 0.92, 0.92);
+                
+                // 動態修正網頁 HTML 遮罩層
+                document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, ${darknessRatio})`;
+                // 同步將 3D 環境光源調暗，小人身上也會折射出深夜的黑影
+                ambientLight.intensity = 0.8 * (1 - darknessRatio);
+            }
 
             if (distance <= 0) {
                 document.getElementById('countdown').innerText = "00:00:00";
@@ -300,6 +339,11 @@
             if(blastStage > 0) return;
             blastStage = 1;
             
+            // 爆炸瞬間：遮罩強制完全破除(0)，炸出亮眼的宇宙星河
+            document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`;
+            ambientLight.intensity = 0.4;
+            scene.background = new THREE.Color(0x020206); // 背景無縫切換成深邃宇宙
+
             document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('joystick-zone').classList.add('hidden');
             if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
@@ -310,7 +354,7 @@
             camera.position.set(0, 22, 55);
             camera.lookAt(0, 18, 0);
 
-            document.getElementById('announcement').innerHTML = "💥 【911 記憶大爆炸】核心回憶原子正在解構擴散...";
+            document.getElementById('announcement').innerHTML = "💥 【911 記憶大爆炸】大安新大樓數據正在重組凝聚...";
 
             const geom = new THREE.BufferGeometry(); const currentPositions = []; const colors = [];
             const particleDensity = 600;
@@ -335,7 +379,7 @@
             scene.add(fireworkParticles);
 
             setTimeout(() => {
-                if(blastStage === 1) document.getElementById('announcement').innerHTML = "✨ 【引力反轉】所有回憶原子正受到重力牽引，緩緩收縮凝聚中...";
+                if(blastStage === 1) document.getElementById('announcement').innerHTML = "✨ 大安記憶原子受到引力逆轉，正在緩緩凝聚收縮中...";
             }, 1200);
 
             setTimeout(() => {
@@ -350,7 +394,7 @@
         const starMeshes = [];
         function buildMemorySphere() {
             starSphereGroup.position.set(0, 18, 0);
-            document.getElementById('announcement').innerHTML = "✨【911 記憶星球】凝聚重構成功！<br>👉 下方輸入『座號』或『姓名』，全自動 3D 雷射追蹤你的回憶之星！";
+            document.getElementById('announcement').innerHTML = "✨【911 記憶星球】凝聚重構成功！<br>👉 下方輸入『座號』或『姓名』，自動 3D 定位你的回憶之星！";
 
             graduationData.forEach((student, index) => {
                 const idx = index * 3;
@@ -371,7 +415,7 @@
             camera.lookAt(0, 18, 0);
         }
 
-        // 3D 鏡頭自動定位搜尋演算法
+        // 3D 鏡頭自動追蹤定位
         let isTrackingCamera = false;
         let camTargetPos = new THREE.Vector3();
 
@@ -400,7 +444,7 @@
                 isUserInteracting = true; 
 
                 setTimeout(() => {
-                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\生科老師偷偷說：\n${info.wish}`);
+                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\n資訊老師心裡話：\n${info.wish}`);
                     targetStar.scale.set(1, 1, 1);
                     targetStar.material.color.setHex(0x00ff9d);
                     targetStar.material.emissive.setHex(0x00ff9d);
@@ -434,8 +478,7 @@
         window.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
         window.addEventListener('touchend', dragEnd);
 
-        // 手動點擊星星
-        const raycaster = new THREE.Raycaster();
+        // 點擊星星支援
         window.addEventListener('click', (e) => {
             if (blastStage !== 2 || isTrackingCamera || e.target.id === "search-input" || e.target.id === "search-btn") return;
             const mouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
@@ -447,13 +490,13 @@
             }
         });
 
-        // === 7. 動力學渲染與主循環更新 ===
+        // === 7. 動力學渲染核心循環 ===
         function animate() {
             requestAnimationFrame(animate);
             updateMovement();
             updateTimeline();
 
-            // 大爆炸與收縮物理插值公式
+            // 爆炸與緩緩凝聚物理插值公式
             if (blastStage === 1 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 gatherProgress += 0.0045; 
