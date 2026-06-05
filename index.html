@@ -350,6 +350,7 @@
         const spherePositions = []; const velocities = [];
         let gatherProgress = 0;
 
+        // 🛠️ 升級版：完美支援 24 小時以上跨天倒數的強健排程演算法
         function updateTimeline() {
             if (blastStage > 0) return;
             const now = new Date().getTime(); const distance = targetTime - now;
@@ -367,9 +368,11 @@
                 return;
             }
 
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            // 🎯 修正核心：拿掉取餘數限制，讓小時數可以突破 24 小時直線上加！
+            const hours = Math.floor(distance / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
             document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
         }
 
