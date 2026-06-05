@@ -273,7 +273,7 @@
 
         // === 5. 排程時間與高強健引爆機制 ===
         // 🛠️ 實驗模式：時間設定在今天 6 月 5 日 23:58:00
-        const targetTime = new Date("June 5, 2026 23:58:00").getTime(); 
+        const targetTime = new Date("June 5, 2026 23:04:00").getTime(); 
         let blastStage = 0; let fireworkParticles;
         let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
         const spherePositions = []; const velocities = [];
@@ -400,7 +400,7 @@
                 isUserInteracting = true; 
 
                 setTimeout(() => {
-                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\n資訊老師心裡話：\n${info.wish}`);
+                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\生科老師偷偷說：\n${info.wish}`);
                     targetStar.scale.set(1, 1, 1);
                     targetStar.material.color.setHex(0x00ff9d);
                     targetStar.material.emissive.setHex(0x00ff9d);
