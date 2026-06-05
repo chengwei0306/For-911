@@ -207,100 +207,55 @@
         pointLight.position.set(0, 30, 0);
         scene.add(pointLight);
 
-        // === 🛠️ 核心黑科技 1：動態畫出標準 19x19 圍棋棋盤地面 ===
+        // === 圍棋棋盤地面製造 ===
         function createGoBoardTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 1024; canvas.height = 1024;
             const ctx = canvas.getContext('2d');
-            
-            // 填滿質感的榧木色棋盤底色
             ctx.fillStyle = '#e2b26e'; ctx.fillRect(0, 0, 1024, 1024);
-            
-            // 畫 19 x 19 條黑色格線
             ctx.strokeStyle = '#221100'; ctx.lineWidth = 3;
-            const pad = 50; // 邊緣留白
-            const step = (1024 - pad * 2) / 18;
-            
+            const pad = 50; const step = (1024 - pad * 2) / 18;
             for(let i=0; i<19; i++) {
-                // 橫線
                 ctx.beginPath(); ctx.moveTo(pad, pad + i*step); ctx.lineTo(1024-pad, pad + i*step); ctx.stroke();
-                // 直線
                 ctx.beginPath(); ctx.moveTo(pad + i*step, pad); ctx.lineTo(pad + i*step, 1024-pad); ctx.stroke();
             }
-            
-            // 畫 9 個標準星位點
-            ctx.fillStyle = '#221100';
-            const stars = [3, 9, 15];
-            stars.forEach(r => {
-                stars.forEach(c => {
-                    ctx.beginPath();
-                    ctx.arc(pad + c*step, pad + r*step, 8, 0, Math.PI*2);
-                    ctx.fill();
-                });
-            });
+            ctx.fillStyle = '#221100'; const stars = [3, 9, 15];
+            stars.forEach(r => { stars.forEach(c => { ctx.beginPath(); ctx.arc(pad + c*step, pad + r*step, 8, 0, Math.PI*2); ctx.fill(); }); });
             return new THREE.CanvasTexture(canvas);
         }
 
-        const floorGeo = new THREE.PlaneGeometry(240, 240);
-        const floorMat = new THREE.MeshStandardMaterial({ map: createGoBoardTexture(), roughness: 0.4 });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ map: createGoBoardTexture(), roughness: 0.4 }));
         floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
 
         const centerPlatform = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.6 }));
         scene.add(centerPlatform);
 
-        // === 🛠️ 核心黑科技 2：虛空中無盡漂流落下的「巨大黑白棋子」系統 ===
+        // === 巨大棋子落下系統 ===
         const goStones = [];
-        const stoneCount = 45; // 巨大棋子總數
+        const stoneCount = 45;
         const stoneGroup = new THREE.Group();
         scene.add(stoneGroup);
 
-        // 圍棋扁圓扁圓的棋子幾何體
-        const stoneGeo = new THREE.SphereGeometry(2.0, 32, 32);
-        stoneGeo.scale(1, 0.4, 1); // 將正圓形壓扁成標準圍棋棋子形狀
-
+        const stoneGeo = new THREE.SphereGeometry(2.0, 32, 32); stoneGeo.scale(1, 0.4, 1);
         const blackStoneMat = new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.1, metalness: 0.1 });
         const whiteStoneMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.15, metalness: 0.05 });
 
         for(let i=0; i<stoneCount; i++) {
             const isWhite = Math.random() > 0.5;
             const stoneMesh = new THREE.Mesh(stoneGeo, isWhite ? whiteStoneMat : blackStoneMat);
-            
-            // 隨機分布在廣闊的四周高空
-            stoneMesh.position.set(
-                (Math.random() - 0.5) * 200,
-                Math.random() * 80 + 20, // 高度在 20~100 之間
-                (Math.random() - 0.5) * 200
-            );
-            
-            // 避開中央圓台，不擋住玩家出生點
-            if(Math.abs(stoneMesh.position.x) < 20 && Math.abs(stoneMesh.position.z) < 20) {
-                stoneMesh.position.x += 40;
-            }
-
-            // 賦予每顆棋子隨機的「落下速度」與「旋轉角速度」
-            stoneMesh.userData = {
-                fallSpeed: Math.random() * 0.15 + 0.05,
-                rotSpeedX: (Math.random() - 0.5) * 0.02,
-                rotSpeedY: (Math.random() - 0.5) * 0.02
-            };
-            stoneGroup.add(stoneMesh);
-            goStones.push(stoneMesh);
+            stoneMesh.position.set((Math.random() - 0.5) * 200, Math.random() * 80 + 20, (Math.random() - 0.5) * 200);
+            if(Math.abs(stoneMesh.position.x) < 20 && Math.abs(stoneMesh.position.z) < 20) stoneMesh.position.x += 40;
+            stoneMesh.userData = { fallSpeed: Math.random() * 0.15 + 0.05, rotSpeedX: (Math.random() - 0.5) * 0.02, rotSpeedY: (Math.random() - 0.5) * 0.02 };
+            stoneGroup.add(stoneMesh); goStones.push(stoneMesh);
         }
 
         function animateGoStones() {
-            if (blastStage > 0) return; // 爆炸後停止落下
+            if (blastStage > 0) return;
             goStones.forEach(stone => {
-                stone.position.y -= stone.userData.fallSpeed;
-                stone.rotation.x += stone.userData.rotSpeedX;
-                stone.rotation.y += stone.userData.rotSpeedY;
-                
-                // 防沉底機制：如果棋子落到地表下方，立刻重置回天頂，形成無盡循环落子瀑布
+                stone.position.y -= stone.userData.fallSpeed; stone.rotation.x += stone.userData.rotSpeedX; stone.rotation.y += stone.userData.rotSpeedY;
                 if (stone.position.y < -2) {
-                    stone.position.y = Math.random() * 40 + 80;
-                    stone.position.x = (Math.random() - 0.5) * 200;
-                    stone.position.z = (Math.random() - 0.5) * 200;
+                    stone.position.y = Math.random() * 40 + 80; stone.position.x = (Math.random() - 0.5) * 200; stone.position.z = (Math.random() - 0.5) * 200;
                 }
             });
         }
@@ -382,6 +337,9 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
+        // 🎯 【核心修改】：在這裡將網頁最上方的導引公告欄，完美替換成您指定的文字內容！
+        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間 🌐 正在建立 911 圍棋元宇宙安全連線... 按下 WASD 或 滑動搖桿 可以自由移動`;
+
         // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
         window.addEventListener('keydown', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = 1; });
@@ -428,7 +386,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        // 固定在 2026/06/09 22:00:00 準時自動引爆
+        // 固定在 2026/06/09 22:00:00 準時自動大爆炸
         const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
@@ -437,7 +395,6 @@
         const spherePositions = []; const velocities = [];
         let gatherProgress = 0;
 
-        // 🛠️ 升級版：完全支援超過 24 小時以上累加的小時數演算法
         function updateTimeline() {
             if (blastStage > 0) return;
             const now = new Date().getTime(); const distance = targetTime - now;
@@ -455,14 +412,13 @@
                 return;
             }
 
-            // 核心演算法：小時數直線累加
             const hours = Math.floor(distance / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
         }
 
-        // 階段一：棋局崩塌大爆炸
+        // 階段一：棋局大爆炸
         function triggerMemoryBlast() {
             if(blastStage > 0) return;
             blastStage = 1;
@@ -475,7 +431,6 @@
             document.getElementById('joystick-zone').classList.add('hidden');
             if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
 
-            // 碎裂清除棋盤、舞台、巨大棋子小人小人
             scene.remove(floor); scene.remove(centerPlatform); scene.remove(player); scene.remove(stoneGroup);
             for (let id in otherPlayers) { scene.remove(otherPlayers[id]); }
 
@@ -521,7 +476,7 @@
                         screen.style.transition = "opacity 1s ease"; screen.style.opacity = 0;
                         setTimeout(() => {
                             screen.classList.add('hidden');
-                            blastStage = 3; // 進入第三階段收縮
+                            blastStage = 3; 
                             document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】黑白回憶子正緩緩凝聚為星球...";
                         }, 1000);
                     }, 3500);
@@ -612,16 +567,13 @@
             }
         });
 
-        // === 8. 3D 渲染核心主循環 ===
+        // === 8. 動力學核心渲染 ===
         function animate() {
             requestAnimationFrame(animate);
             updateMovement();
             updateTimeline();
-            
-            // 棋子緩緩落下飄流運算
             animateGoStones();
 
-            // 狀態 1：煙火爆炸運動
             if (blastStage === 1 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 for (let i = 0; i < posArr.length / 3; i++) {
@@ -631,7 +583,6 @@
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
             }
 
-            // 狀態 2：打字機靜止背景飄動
             if (blastStage === 2 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 for (let i = 0; i < posArr.length / 3; i++) {
@@ -640,7 +591,6 @@
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
             }
 
-            // 狀態 3：緩緩收縮凝聚為星球
             if (blastStage === 3 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 gatherProgress += 0.005; 
