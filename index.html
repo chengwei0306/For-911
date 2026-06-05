@@ -121,7 +121,7 @@
         <div id="typewriter-text"></div>
     </div>
 
-    <!-- <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button> -->
+    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
@@ -143,7 +143,7 @@
 
     <script>
         // === 0.0 進入網頁前問姓名座號 ===
-        let myUsername = prompt("【911 限定】請輸入你的座號或名字或綽號", "");
+        let myUsername = prompt("【911 圍棋班限定】請輸入你的座號或名字或綽號", "");
         if(!myUsername || myUsername.trim() === "") {
             myUsername = "棋手_" + Math.floor(Math.random() * 900 + 100);
         }
@@ -181,7 +181,7 @@
 
         const pCount = graduationData.length; 
 
-        const teacherSpeech = "⚡ [911 核心通訊已連接]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n ＠chengwei_2232 \n2026.06.09";
+        const teacherSpeech = "⚡ [911 棋局核心通訊已建立]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 ＠chengwei_2232 \n2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
@@ -189,9 +189,10 @@
         // 載入大安國中新大樓背景
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load('daan.jpeg', function(texture) {
-            scene.background = texture; 
+            // 只有在一開始倒數階段才需要大安背景
+            if(blastStage === 0) scene.background = texture; 
         }, undefined, function(err) {
-            scene.background = new THREE.Color(0x04040c);
+            if(blastStage === 0) scene.background = new THREE.Color(0x04040c);
         });
 
         scene.fog = new THREE.FogExp2(0x020206, 0.012);
@@ -207,7 +208,7 @@
         pointLight.position.set(0, 30, 0);
         scene.add(pointLight);
 
-        // === 圍棋棋盤地面製造 ===
+        // 圍棋棋盤地面
         function createGoBoardTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 1024; canvas.height = 1024;
@@ -231,7 +232,7 @@
         const centerPlatform = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.6 }));
         scene.add(centerPlatform);
 
-        // === 巨大棋子落下系統 ===
+        // 巨大棋子落下系統
         const goStones = [];
         const stoneCount = 100;
         const stoneGroup = new THREE.Group();
@@ -337,8 +338,8 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        // 🎯 【核心修改】：在這裡將網頁最上方的導引公告欄，完美替換成您指定的文字內容！
-        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間 <br>🌐 已建立 911 圍棋元宇宙安全連線... <br>按下 WASD 或 滑動搖桿 可以自由移動`;
+        // 導引公告欄換行排版
+        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間<br>🌐 已建立 911 圍棋元宇宙安全連線...<br>按下 WASD 或 滑動搖桿 可以自由移動`;
 
         // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
@@ -386,11 +387,12 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        // 固定在 2026/06/09 22:00:00 準時自動大爆炸
-        const targetTime = new Date("June 6, 2026 00:35:00").getTime(); 
+        // 🚀 正式時間請改回您需要的 6 月 9 日晚上 22:00:00
+        const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
-        let blastStage = 0; let fireworkParticles;
+        let blastStage = 0; 
+        let fireworkParticles;
         let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
         const spherePositions = []; const velocities = [];
         let gatherProgress = 0;
@@ -423,6 +425,7 @@
             if(blastStage > 0) return;
             blastStage = 1;
             
+            // 正常爆炸時，強制洗掉大安背景圖與遮罩
             document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`;
             ambientLight.intensity = 0.4;
             scene.background = new THREE.Color(0x020206); 
@@ -477,7 +480,7 @@
                         setTimeout(() => {
                             screen.classList.add('hidden');
                             blastStage = 3; 
-                            document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】回憶正緩緩凝聚為星球...";
+                            document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】黑白回憶子正緩緩凝聚為星球...";
                         }, 1000);
                     }, 3500);
                 }
@@ -485,13 +488,30 @@
             type();
         }
 
-        // 階段四：記憶星球高階互動
+        // 階段四：記憶星球激活自轉
         const starMeshes = [];
         function buildMemorySphere() {
+            blastStage = 4; // 確保強制跳關時狀態正確被同步
             starSphereGroup.position.set(0, 18, 0);
             document.getElementById('announcement').innerHTML = "✨【911 記憶星球】凝聚重構成功！<br>👉 下方輸入『座號』或『姓名』，自動 3D 定位你的棋局回憶之星！";
 
-            // 🎯 【關鍵修正】：爆炸凝聚成星球後，將原本隱藏的搜尋框顯示出來！
+            // 🎯【重磅修復核心】：不論是從倒數進來的，還是重新整理跳關進來的，一律強制用純黑深邃宇宙洗掉大安國中背景圖！
+            scene.background = new THREE.Color(0x020206);
+            document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`; // 破除黑網
+            
+            // 同步隱藏一開始的走路UI與倒數計時框，防範跳關穿幫
+            document.getElementById('timer-box').classList.add('hidden');
+            document.getElementById('joystick-zone').classList.add('hidden');
+            if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
+            
+            // 移除可能殘留在場景中的第一階段物件（如：圍棋地面、出生圓台、落下的巨大棋子）
+            scene.remove(floor); 
+            scene.remove(centerPlatform); 
+            scene.remove(player); 
+            scene.remove(stoneGroup);
+            for (let id in otherPlayers) { scene.remove(otherPlayers[id]); }
+
+            // 🎯【顯示搜尋框修正】：確保搜尋框重見天日
             document.getElementById('search-container').classList.remove('hidden');
 
             graduationData.forEach((student, index) => {
@@ -511,6 +531,7 @@
 
         let isTrackingCamera = false; let camTargetPos = new THREE.Vector3();
 
+        // 搜尋 3D 鏡頭自動插值追蹤演算法
         function searchMyStar() {
             const query = document.getElementById('search-input').value.trim().toLowerCase();
             if(!query) return alert("請輸入座號或姓名！");
@@ -606,7 +627,7 @@
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
 
                 if(gatherProgress >= 1.0) {
-                    blastStage = 4; scene.remove(fireworkParticles); buildMemorySphere();
+                    scene.remove(fireworkParticles); buildMemorySphere();
                 }
             }
 
