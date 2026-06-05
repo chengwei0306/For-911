@@ -191,7 +191,7 @@
         player.position.set((Math.random()-0.5)*30, 0, (Math.random()-0.5)*30);
         scene.add(player);
 
-        // === 3. 完美更換：911 專屬獨立安全網路連線通道 (PubNub) ===
+        // === 3. 911 專屬私密網路連線通道 ===
         const myID = "911_" + Math.floor(Math.random() * 10000);
         const otherPlayers = {};
 
@@ -272,7 +272,6 @@
         }
 
         // === 5. 排程時間與大爆炸重構演算法 ===
-        // 倒數計時點設定在 2026年6月19日 晚上 20:00:00
         const targetTime = new Date("June 19, 2026 20:00:00").getTime(); 
         let blastStage = 0; let fireworkParticles;
         let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
@@ -290,6 +289,7 @@
             }
         }
 
+        // 🛠️ 核心修正：安全的物件清除迴圈，確保大爆炸動畫順暢執行
         function triggerMemoryBlast() {
             if(blastStage > 0) return;
             blastStage = 1;
@@ -298,14 +298,31 @@
             document.getElementById('joystick-zone').classList.add('hidden');
             if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
 
-            scene.children = scene.children.filter(c => c === starSphereGroup || c.type === "AmbientLight" || c.type === "PointLight");
+            // 修正點：不直接對 scene.children 進行 filter，改用標準安全移除法
+            scene.remove(floor);
+            scene.remove(centerPlatform);
+            scene.remove(player);
+            for (let id in otherPlayers) {
+                scene.remove(otherPlayers[id]);
+            }
+
+            // 強制將相機鎖定在爆炸圓心，並優美拉遠
+            camera.position.set(0, 22, 55);
+            camera.lookAt(0, 18, 0);
+
             document.getElementById('announcement').innerHTML = "💥 【911 數據大爆炸】記憶原子重組升維中...";
 
             const geom = new THREE.BufferGeometry(); const currentPositions = []; const colors = [];
-            for (let i = 0; i < pCount; i++) {
-                currentPositions.push(0, 18, 0);
-                velocities.push((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 4);
+            
+            // 增加粒子總量到 600 顆，讓大爆炸視覺效果更澎湃
+            const particleDensity = 600;
+            for (let i = 0; i < particleDensity; i++) {
+                currentPositions.push(0, 18, 0); // 爆炸核心原點
                 
+                // 爆炸噴射速度與方向力道
+                velocities.push((Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 5.0, (Math.random() - 0.5) * 5.0);
+                
+                // 計算未來 3D 星球表面的球面坐標
                 const radius = 22; const u = Math.random(); const v = Math.random();
                 const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
                 spherePositions.push(radius * Math.sin(phi) * Math.cos(theta), radius * Math.sin(phi) * Math.sin(theta) + 18, radius * Math.cos(phi));
@@ -314,11 +331,14 @@
             geom.setAttribute('position', new THREE.Float32BufferAttribute(currentPositions, 3));
             geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
             
-            fireworkParticles = new THREE.Points(geom, new THREE.PointsMaterial({ size: 0.8, vertexColors: true, transparent: true, opacity: 1.0 }));
+            fireworkParticles = new THREE.Points(geom, new THREE.PointsMaterial({ size: 0.9, vertexColors: true, transparent: true, opacity: 1.0 }));
             scene.add(fireworkParticles);
 
+            // 2.5 秒大爆炸後，逆轉重力引力凝聚成自轉記憶星球
             setTimeout(() => {
-                blastStage = 2; scene.remove(fireworkParticles); buildMemorySphere();
+                blastStage = 2; 
+                scene.remove(fireworkParticles); 
+                buildMemorySphere();
                 document.getElementById('search-container').classList.remove('hidden'); 
             }, 2500);
         }
@@ -428,11 +448,15 @@
             updateMovement();
             updateTimeline();
 
+            // 爆炸粒子物理運動軌跡更新
             if (blastStage === 1 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 for (let i = 0; i < posArr.length / 3; i++) {
-                    posArr[i*3] += velocities[i*3]; posArr[i*3+1] += velocities[i*3+1]; posArr[i*3+2] += velocities[i*3+2];
-                    velocities[i*3] *= 0.97; velocities[i*3+1] *= 0.97; velocities[i*3+2] *= 0.97;
+                    posArr[i*3] += velocities[i*3]; 
+                    posArr[i*3+1] += velocities[i*3+1]; 
+                    posArr[i*3+2] += velocities[i*3+2];
+                    // 空氣微弱阻力減速
+                    velocities[i*3] *= 0.98; velocities[i*3+1] *= 0.98; velocities[i*3+2] *= 0.98;
                 }
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
             }
