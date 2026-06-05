@@ -271,24 +271,29 @@
             }
         }
 
-        // === 5. 排程時間與大爆炸/緩緩凝聚重構演算法 ===
-        const targetTime = new Date("June 5, 2026 20:54:00").getTime(); 
-        let blastStage = 0; // 0: 倒數/移動, 1: 煙火爆炸/凝聚中, 2: 星球建構完成自轉
-        let fireworkParticles;
+        // === 5. 排程時間與高強健引爆機制 ===
+        // 🛠️ 實驗模式：時間設定在今天 6 月 5 日 23:58:00
+        const targetTime = new Date("June 5, 2026 23:58:00").getTime(); 
+        let blastStage = 0; let fireworkParticles;
         let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
         const spherePositions = []; const velocities = [];
-        let gatherProgress = 0; // 凝聚進度計時器
+        let gatherProgress = 0;
 
         function updateTimeline() {
             if (blastStage > 0) return;
-            const now = new Date().getTime(); const distance = targetTime - now;
-            if (distance <= 0) { triggerMemoryBlast(); } 
-            else {
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+            const now = new Date().getTime(); 
+            const distance = targetTime - now;
+
+            if (distance <= 0) {
+                document.getElementById('countdown').innerText = "00:00:00";
+                triggerMemoryBlast();
+                return;
             }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
         }
 
         function triggerMemoryBlast() {
@@ -299,7 +304,6 @@
             document.getElementById('joystick-zone').classList.add('hidden');
             if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
 
-            // 移除舊世界
             scene.remove(floor); scene.remove(centerPlatform); scene.remove(player);
             for (let id in otherPlayers) { scene.remove(otherPlayers[id]); }
 
@@ -309,20 +313,14 @@
             document.getElementById('announcement').innerHTML = "💥 【911 記憶大爆炸】核心回憶原子正在解構擴散...";
 
             const geom = new THREE.BufferGeometry(); const currentPositions = []; const colors = [];
-            
-            // 生成 600 顆璀璨粒子
             const particleDensity = 600;
             for (let i = 0; i < particleDensity; i++) {
-                currentPositions.push(0, 18, 0); // 爆炸原點
-                
-                // 初始猛烈向外噴射的速度力道
+                currentPositions.push(0, 18, 0);
                 velocities.push((Math.random() - 0.5) * 6.5, (Math.random() - 0.5) * 6.5, (Math.random() - 0.5) * 6.5);
                 
-                // 事先計算出每顆粒子在「未來 3D 球體表面」的精準目標座標
                 const radius = 22; const u = Math.random(); const v = Math.random();
                 const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
                 
-                // 星球圓心設定在高度 18
                 spherePositions.push(
                     radius * Math.sin(phi) * Math.cos(theta), 
                     radius * Math.sin(phi) * Math.sin(theta) + 18, 
@@ -336,12 +334,10 @@
             fireworkParticles = new THREE.Points(geom, new THREE.PointsMaterial({ size: 0.9, vertexColors: true, transparent: true, opacity: 1.0 }));
             scene.add(fireworkParticles);
 
-            // 1.2 秒煙火噴發到最極致時，反轉引力，啟動緩緩凝聚收縮公告
             setTimeout(() => {
-                document.getElementById('announcement').innerHTML = "✨ 【引力反轉】所有回憶原子正受到重力牽引，緩緩收縮凝聚中...";
+                if(blastStage === 1) document.getElementById('announcement').innerHTML = "✨ 【引力反轉】所有回憶原子正受到重力牽引，緩緩收縮凝聚中...";
             }, 1200);
 
-            // 4.5 秒平滑收縮完成後，無縫轉換成可互動點選的實體 3D 記憶星球
             setTimeout(() => {
                 blastStage = 2; 
                 scene.remove(fireworkParticles); 
@@ -375,7 +371,7 @@
             camera.lookAt(0, 18, 0);
         }
 
-        // 3D 鏡鏡頭自動定位搜尋演算法
+        // 3D 鏡頭自動定位搜尋演算法
         let isTrackingCamera = false;
         let camTargetPos = new THREE.Vector3();
 
@@ -438,7 +434,7 @@
         window.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
         window.addEventListener('touchend', dragEnd);
 
-        // 手動點擊
+        // 手動點擊星星
         const raycaster = new THREE.Raycaster();
         window.addEventListener('click', (e) => {
             if (blastStage !== 2 || isTrackingCamera || e.target.id === "search-input" || e.target.id === "search-btn") return;
@@ -451,33 +447,23 @@
             }
         });
 
-        // === 7. 動力學渲染與高階矩陣排程控制循環 ===
+        // === 7. 動力學渲染與主循環更新 ===
         function animate() {
             requestAnimationFrame(animate);
             updateMovement();
             updateTimeline();
 
-            // 核心：控制大爆炸與緩緩凝聚收縮的物理數學公式
+            // 大爆炸與收縮物理插值公式
             if (blastStage === 1 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
-                gatherProgress += 0.0045; // 演算法演進步長 (決定凝聚速度)
+                gatherProgress += 0.0045; 
 
                 for (let i = 0; i < posArr.length / 3; i++) {
                     const idx = i * 3;
-                    
                     if (gatherProgress < 0.25) {
-                        // 【前段：1.2秒內】粒子遵循原先的物理爆炸慣性劇烈向外噴散
-                        posArr[idx] += velocities[idx];
-                        posArr[idx+1] += velocities[idx+1];
-                        posArr[idx+2] += velocities[idx+2];
-                        // 摩擦力空氣減速，使其在空中慢慢停滯
+                        posArr[idx] += velocities[idx]; posArr[idx+1] += velocities[idx+1]; posArr[idx+2] += velocities[idx+2];
                         velocities[idx] *= 0.95; velocities[idx+1] *= 0.95; velocities[idx+2] *= 0.95;
                     } else {
-                        // 【後段：1.2秒至4.5秒】啟動引力反轉，粒子利用 Lerp 內插法緩緩、流暢地向未來星球表面位置收縮凝聚
-                        const t = (gatherProgress - 0.25) / 0.75; // 正規化時間比例
-                        const smoothT = Math.min(t * t * (3 - 2 * t), 1); // 使用 Smoothstep 讓收縮帶有緩和慣性，看起來更優雅
-                        
-                        // 從當前爆炸開的位置，緩緩吸回目標球面座標
                         posArr[idx] += (spherePositions[idx] - posArr[idx]) * 0.04;
                         posArr[idx+1] += (spherePositions[idx+1] - posArr[idx+1]) * 0.04;
                         posArr[idx+2] += (spherePositions[idx+2] - posArr[idx+2]) * 0.04;
@@ -486,13 +472,11 @@
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
             }
 
-            // 鏡頭自動追焦
             if (isTrackingCamera) {
                 camera.position.lerp(camTargetPos, 0.08); 
                 camera.lookAt(0, 18, 0);
             }
 
-            // 星球慢速自動自轉
             if (blastStage === 2 && !isUserInteracting) {
                 starSphereGroup.rotation.y += 0.0025;
             }
