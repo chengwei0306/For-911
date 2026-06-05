@@ -491,6 +491,9 @@
             starSphereGroup.position.set(0, 18, 0);
             document.getElementById('announcement').innerHTML = "✨【911 記憶星球】凝聚重構成功！<br>👉 下方輸入『座號』或『姓名』，自動 3D 定位你的棋局回憶之星！";
 
+            // 🎯 【關鍵修正】：爆炸凝聚成星球後，將原本隱藏的搜尋框顯示出來！
+            document.getElementById('search-container').classList.remove('hidden');
+
             graduationData.forEach((student, index) => {
                 const idx = index * 3;
                 const starGeo = new THREE.IcosahedronGeometry(0.7, 0); 
