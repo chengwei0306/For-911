@@ -143,7 +143,7 @@
 
     <script>
         // === 0.0 進入網頁前問姓名座號 ===
-        let myUsername = prompt("【911 圍棋班限定】請輸入你的座號或名字或綽號", "");
+        let myUsername = prompt("【911 限定】請輸入你的座號或名字或綽號", "");
         if(!myUsername || myUsername.trim() === "") {
             myUsername = "棋手_" + Math.floor(Math.random() * 900 + 100);
         }
@@ -233,7 +233,7 @@
 
         // === 巨大棋子落下系統 ===
         const goStones = [];
-        const stoneCount = 45;
+        const stoneCount = 100;
         const stoneGroup = new THREE.Group();
         scene.add(stoneGroup);
 
@@ -338,7 +338,7 @@
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
         // 🎯 【核心修改】：在這裡將網頁最上方的導引公告欄，完美替換成您指定的文字內容！
-        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間 🌐 正在建立 911 圍棋元宇宙安全連線... 按下 WASD 或 滑動搖桿 可以自由移動`;
+        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間 <br>🌐 已建立 911 圍棋元宇宙安全連線... <br>按下 WASD 或 滑動搖桿 可以自由移動`;
 
         // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
