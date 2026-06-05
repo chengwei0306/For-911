@@ -15,11 +15,11 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
         }
         
-        /* 核心黑科技：天色變黑動態遮罩層 (由倒數計時即時計算 opacity) */
+        /* 天色變黑動態遮罩層 */
         #sky-mask {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2; background: rgba(0, 0, 0, 0);
-            pointer-events: none; /* 穿透點擊，不干擾 3D 控制 */
+            pointer-events: none; 
             transition: background 0.5s ease;
         }
 
@@ -97,7 +97,6 @@
 <body>
 
     <canvas id="webgl-stage"></canvas>
-    
     <div id="sky-mask"></div>
 
     <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
@@ -121,7 +120,13 @@
     </div>
 
     <script>
-        // === 0. 911 畢業班級名單與專屬祝福資料庫 ===
+        // === 0.0 進網頁前先問名字與座號 ===
+        let myUsername = prompt("【911 畢業限定】請輸入你的座號與名字 (例如: 26 林延宥)", "");
+        if(!myUsername || myUsername.trim() === "") {
+            myUsername = "匿名大安人_" + Math.floor(Math.random() * 900 + 100);
+        }
+
+        // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
         const graduationData = [
             { id: "star_01", seat: "01", name: "王群叡", wish: "畢業快樂🎉" },
             { id: "star_03", seat: "03", name: "吳沁璇", wish: "畢業快樂🎉" },
@@ -157,13 +162,11 @@
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
         
-        // 核心修改：利用大安國中全新落成綜合教學大樓的真實影像當作背景貼圖！
+        // 載入大安國中新大樓影像背景
         const textureLoader = new THREE.TextureLoader();
-        // 這裡直接讀取上傳的大安新大樓模擬透視景觀照片
         textureLoader.load('https://upload.wikimedia.org/wikipedia/commons/e/ec/Daan_Junior_High_School_New_Building.png', function(texture) {
             scene.background = texture; 
         }, undefined, function(err) {
-            // 備用防掛機制：如果載入失敗，則呈現高質感夜空色
             scene.background = new THREE.Color(0x0e0e1a);
         });
 
@@ -174,14 +177,13 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // 建立初始環境光
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         const pointLight = new THREE.PointLight(0x00ff9d, 2, 300);
         pointLight.position.set(0, 25, 0);
         scene.add(pointLight);
 
-        // 網格地面與大安圓台
+        // 地面與圓台
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ color: 0x0c0c1a, roughness: 0.85 }));
         floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
@@ -189,32 +191,69 @@
         const centerPlatform = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.6 }));
         scene.add(centerPlatform);
 
-        // === 2. 3D 像素小人生成演算法 ===
-        function create3DHumanoid(color, isMe) {
+        // === 2. 核心黑科技：名字懸浮文字看板生成（Canvas 霓虹文字轉 3D 貼圖） ===
+        function createNameTag(text, colorHexStr) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 繪製半透明背景膠囊
+            ctx.fillStyle = 'rgba(10, 10, 25, 0.65)';
+            ctx.roundRect ? ctx.roundRect(10, 5, 236, 44, 20) : ctx.rect(10, 5, 236, 44);
+            ctx.fill();
+            
+            // 繪製發光字體
+            ctx.font = 'bold 22px "Microsoft JhengHei", Arial, sans-serif';
+            ctx.fillStyle = colorHexStr;
+            ctx.textAlign = 'center';
+            ctx.shadowColor = colorHexStr;
+            ctx.shadowBlur = 8;
+            ctx.fillText(text, 128, 33);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+            const sprite = new THREE.Sprite(spriteMat);
+            // 控制懸浮看版的大小比例
+            sprite.scale.set(4.5, 1.1, 1);
+            return sprite;
+        }
+
+        // === 3. 3D 像素小人堆疊演算法 ===
+        function create3DHumanoid(color, isMe, nameText) {
             const group = new THREE.Group();
+
+            // 頭部
             const head = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.0, 1.0), new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: isMe ? 0.4 : 0.1 }));
             head.position.y = 2.4;
             const body = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 0.8), new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.5 }));
             body.position.y = 1.4;
             group.add(head, body);
 
+            // 雙手雙腳
             const armMat = new THREE.MeshStandardMaterial({ color: color });
             const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.4), armMat); leftArm.position.set(-0.9, 1.4, 0);
             const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 0.4), armMat); rightArm.position.set(0.9, 1.4, 0);
-            group.add(leftArm, rightArm);
-
             const legMat = new THREE.MeshStandardMaterial({ color: 0x111115 });
             const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), legMat); leftLeg.position.set(-0.4, 0.4, 0);
             const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.5), legMat); rightLeg.position.set(0.4, 0.4, 0);
-            group.add(leftLeg, rightLeg);
+            group.add(leftArm, rightArm, leftLeg, rightLeg);
+
+            // 【重磅功能】：建立頭頂懸浮的名字標籤，綁定在角色群組裡
+            const nameTagColor = isMe ? "#00ff9d" : "#ff007f"; // 自己是綠字，同學是桃紅字
+            const nameTag = createNameTag(nameText, nameTagColor);
+            nameTag.position.y = 3.6; // 精準定錨在小人頭頂上方 0.6 單位處
+            group.add(nameTag);
+
             return group;
         }
 
-        const player = create3DHumanoid(0x00ff9d, true);
+        // 建立「自己」的 3D 小人，頭上頂著剛才輸入的名字
+        const player = create3DHumanoid(0x00ff9d, true, myUsername);
         player.position.set((Math.random()-0.5)*30, 0, (Math.random()-0.5)*30);
         scene.add(player);
 
-        // === 3. 911 專屬私密連線通道 (PubNub) ===
+        // === 4. 多人網路連線位置與名字同步 (PubNub) ===
         const myID = "911_" + Math.floor(Math.random() * 10000);
         const otherPlayers = {};
 
@@ -228,8 +267,10 @@
             message: function(event) {
                 const data = event.message;
                 if (data.id !== myID && blastStage === 0) {
+                    // 如果看見新同學，接收他的座標與傳過來的名字！
                     if (!otherPlayers[data.id]) {
-                        otherPlayers[data.id] = create3DHumanoid(Math.random() * 0xffffff, false);
+                        const randomColor = Math.random() * 0xffffff;
+                        otherPlayers[data.id] = create3DHumanoid(randomColor, false, data.name);
                         scene.add(otherPlayers[data.id]);
                     }
                     otherPlayers[data.id].position.set(data.x, data.y, data.z);
@@ -245,9 +286,9 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        document.getElementById('announcement').innerHTML = "🏫 歡迎來到大安國中 911 元宇宙空間！<br>使用 鍵盤WASD 或 虛擬搖桿 控制 3D 小人移動。";
+        document.getElementById('announcement').innerHTML = `🏫 歡迎 <b>${myUsername}</b> 進入元宇宙。<br>鍵盤WASD 或 左下搖桿 移動，時間到將觸發環境黑幕變暗！`;
 
-        // === 4. 移動控制系統 ===
+        // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
         window.addEventListener('keydown', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = 1; });
         window.addEventListener('keyup', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = 0; });
@@ -289,15 +330,18 @@
 
             const now = performance.now();
             if (isMoving && now - lastBroadcast > 50) {
-                pubnub.publish({ channel: 'class_911_metaverse', message: { id: myID, x: player.position.x, y: player.position.y, z: player.position.z, ry: player.rotation.y } });
+                // 網路廣播封包封包升級：除了位置跟轉向，連同自己的「名字」一起廣播出去
+                pubnub.publish({ 
+                    channel: 'class_911_metaverse', 
+                    message: { id: myID, name: myUsername, x: player.position.x, y: player.position.y, z: player.position.z, ry: player.rotation.y } 
+                });
                 lastBroadcast = now;
             }
         }
 
-        // === 5. 核心修改：22:00 排程時間與「天色漸進黑幕遮罩演算法」 ===
-        // 🚀 預計在今晚 22:00:00 準時大爆炸
-        const targetTime = new Date("June 5, 2026 23:20:00").getTime(); 
-        // 為了讓遮罩平滑，我們定義「黃昏變黑開始計算的起點時間」（例如爆炸前 1 小時，也就是 21:00）
+        // === 6. 排程時間與天色漸變變黑遮罩系統 ===
+        // 設定在今天晚上 22:00:00 準時自動大爆炸
+        const targetTime = new Date("June 5, 2026 22:00:00").getTime(); 
         const duskStartTime = new Date("June 5, 2026 21:00:00").getTime();
 
         let blastStage = 0; let fireworkParticles;
@@ -307,19 +351,13 @@
 
         function updateTimeline() {
             if (blastStage > 0) return;
-            const now = new Date().getTime(); 
-            const distance = targetTime - now;
+            const now = new Date().getTime(); const distance = targetTime - now;
 
-            // 🛠️ 核心黑科技：計算距離 22:00 的進度，驅動網頁天色逐漸變黑
             if (now >= duskStartTime) {
                 const totalDuskDuration = targetTime - duskStartTime;
                 const elapseddusk = now - duskStartTime;
-                // 計算出 0 到 0.92 之間的暗度比率 (留下 0.08 讓底圖隱約可見，營造極致暴風雨前的寧靜)
                 const darknessRatio = Math.min((elapseddusk / totalDuskDuration) * 0.92, 0.92);
-                
-                // 動態修正網頁 HTML 遮罩層
                 document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, ${darknessRatio})`;
-                // 同步將 3D 環境光源調暗，小人身上也會折射出深夜的黑影
                 ambientLight.intensity = 0.8 * (1 - darknessRatio);
             }
 
@@ -339,10 +377,9 @@
             if(blastStage > 0) return;
             blastStage = 1;
             
-            // 爆炸瞬間：遮罩強制完全破除(0)，炸出亮眼的宇宙星河
             document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`;
             ambientLight.intensity = 0.4;
-            scene.background = new THREE.Color(0x020206); // 背景無縫切換成深邃宇宙
+            scene.background = new THREE.Color(0x020206); 
 
             document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('joystick-zone').classList.add('hidden');
@@ -364,12 +401,7 @@
                 
                 const radius = 22; const u = Math.random(); const v = Math.random();
                 const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
-                
-                spherePositions.push(
-                    radius * Math.sin(phi) * Math.cos(theta), 
-                    radius * Math.sin(phi) * Math.sin(theta) + 18, 
-                    radius * Math.cos(phi)
-                );
+                spherePositions.push(radius * Math.sin(phi) * Math.cos(theta), radius * Math.sin(phi) * Math.sin(theta) + 18, radius * Math.cos(phi));
                 colors.push(0.0, 1.0, 0.61); 
             }
             geom.setAttribute('position', new THREE.Float32BufferAttribute(currentPositions, 3));
@@ -383,14 +415,12 @@
             }, 1200);
 
             setTimeout(() => {
-                blastStage = 2; 
-                scene.remove(fireworkParticles); 
-                buildMemorySphere();
+                blastStage = 2; scene.remove(fireworkParticles); buildMemorySphere();
                 document.getElementById('search-container').classList.remove('hidden'); 
             }, 4500);
         }
 
-        // === 6. 記憶星球高階互動系統 ===
+        // === 7. 記憶星球高階互動與自動搜尋系統 ===
         const starMeshes = [];
         function buildMemorySphere() {
             starSphereGroup.position.set(0, 18, 0);
@@ -402,7 +432,6 @@
                 const starMat = new THREE.MeshStandardMaterial({ color: 0x00ff9d, emissive: 0x00ff9d, emissiveIntensity: 0.8, roughness: 0.1 });
                 const mesh = new THREE.Mesh(starGeo, starMat);
                 mesh.position.set(spherePositions[idx], spherePositions[idx+1] - 18, spherePositions[idx+2]);
-                
                 mesh.userData = { studentInfo: student };
                 starSphereGroup.add(mesh);
                 starMeshes.push(mesh);
@@ -410,14 +439,9 @@
             resetCamera();
         }
 
-        function resetCamera() {
-            camera.position.set(0, 18, 52);
-            camera.lookAt(0, 18, 0);
-        }
+        function resetCamera() { camera.position.set(0, 18, 52); camera.lookAt(0, 18, 0); }
 
-        // 3D 鏡頭自動追蹤定位
-        let isTrackingCamera = false;
-        let camTargetPos = new THREE.Vector3();
+        let isTrackingCamera = false; let camTargetPos = new THREE.Vector3();
 
         function searchMyStar() {
             const query = document.getElementById('search-input').value.trim().toLowerCase();
@@ -439,34 +463,23 @@
                 targetStar.material.color.setHex(0xff007f);
                 targetStar.material.emissive.setHex(0xff007f);
                 targetStar.scale.set(2.5, 2.5, 2.5);
-
-                isTrackingCamera = true;
-                isUserInteracting = true; 
+                isTrackingCamera = true; isUserInteracting = true; 
 
                 setTimeout(() => {
                     alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\n資訊老師心裡話：\n${info.wish}`);
-                    targetStar.scale.set(1, 1, 1);
-                    targetStar.material.color.setHex(0x00ff9d);
-                    targetStar.material.emissive.setHex(0x00ff9d);
-                    isTrackingCamera = false;
-                    isUserInteracting = false;
-                    resetCamera();
+                    targetStar.scale.set(1, 1, 1); targetStar.material.color.setHex(0x00ff9d); targetStar.material.emissive.setHex(0x00ff9d);
+                    isTrackingCamera = false; isUserInteracting = false; resetCamera();
                 }, 1500); 
-
-            } else {
-                alert("找不到對應的同學，請檢查輸入是否正確（例如：26）");
-            }
+            } else { alert("找不到對應的同學！"); }
         }
 
-        // 滑動旋轉控制
+        // 觸控拖曳旋轉
         let isDragging = false; let prevMousePosition = { x: 0, y: 0 }; let isUserInteracting = false;
         function dragStart(x, y) { if(isTrackingCamera) return; isDragging = true; prevMousePosition = { x, y }; }
         function dragMove(x, y) {
             if (!isDragging || blastStage !== 2) return;
-            const deltaX = x - prevMousePosition.x;
-            const deltaY = y - prevMousePosition.y;
-            starSphereGroup.rotation.y += deltaX * 0.005;
-            starSphereGroup.rotation.x += deltaY * 0.005;
+            starSphereGroup.rotation.y += (x - prevMousePosition.x) * 0.005;
+            starSphereGroup.rotation.x += (y - prevMousePosition.y) * 0.005;
             isUserInteracting = true; prevMousePosition = { x, y };
         }
         function dragEnd() { isDragging = false; setTimeout(() => { if(!isTrackingCamera) isUserInteracting = false; }, 2000); }
@@ -478,7 +491,7 @@
         window.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
         window.addEventListener('touchend', dragEnd);
 
-        // 點擊星星支援
+        const raycaster = new THREE.Raycaster();
         window.addEventListener('click', (e) => {
             if (blastStage !== 2 || isTrackingCamera || e.target.id === "search-input" || e.target.id === "search-btn") return;
             const mouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
@@ -490,17 +503,16 @@
             }
         });
 
-        // === 7. 動力學渲染核心循環 ===
+        // === 8. 渲染主循環 ===
         function animate() {
             requestAnimationFrame(animate);
             updateMovement();
             updateTimeline();
 
-            // 爆炸與緩緩凝聚物理插值公式
+            // 大爆炸與收縮動畫
             if (blastStage === 1 && fireworkParticles) {
                 const posArr = fireworkParticles.geometry.attributes.position.array;
                 gatherProgress += 0.0045; 
-
                 for (let i = 0; i < posArr.length / 3; i++) {
                     const idx = i * 3;
                     if (gatherProgress < 0.25) {
