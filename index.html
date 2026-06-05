@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>911 3D 元宇宙：終焉星河</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #020208;
+            font-family: 'Courier New', Courier, monospace, "Microsoft JhengHei";
+            user-select: none; -webkit-user-select: none;
+        }
+        #webgl-stage {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+        }
+        #ui-container {
+            position: absolute; top: 20px; left: 50%;
+            transform: translateX(-50%); z-index: 10;
+            width: 90%; max-width: 600px; text-align: center;
+            pointer-events: none;
+        }
+        .system-announcement {
+            background: rgba(10, 10, 25, 0.85);
+            border: 2px solid #00ff9d; color: #00ff9d;
+            padding: 12px; font-weight: bold; border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,255,157,0.3);
+            margin-bottom: 10px; font-size: 14px;
+            letter-spacing: 1px; line-height: 1.4;
+        }
+        .timer-box {
+            background: rgba(0, 0, 0, 0.7); color: #fff;
+            padding: 8px 15px; display: inline-block;
+            border-radius: 20px; font-size: 14px; border: 1px solid #ff007f;
+        }
+        #countdown { font-weight: bold; color: #ff007f; text-shadow: 0 0 5px #ff007f; }
+        
+        /* 手機版虛擬搖桿 */
+        #joystick-zone {
+            position: absolute; bottom: 40px; left: 40px;
+            width: 110px; height: 110px; background: rgba(255,255,255,0.08);
+            border-radius: 50%; z-index: 10; border: 1px solid rgba(255,255,255,0.2);
+            touch-action: none; display: block;
+        }
+        #joystick-stick {
+            position: absolute; top: 35px; left: 35px;
+            width: 40px; height: 40px; background: #00ff9d;
+            border-radius: 50%; box-shadow: 0 0 12px #00ff9d;
+            transition: transform 0.05s ease;
+        }
+        
+        /* 隱藏元素 */
+        .hidden { display: none !important; }
+        
+        /* 測試用手動引爆按鈕 (部署後若不想要可以自行刪除) */
+        #test-btn {
+            position: absolute; bottom: 40px; right: 40px; z-index: 100;
+            background: #ff007f; color: #fff; border: none; padding: 12px 20px;
+            font-weight: bold; border-radius: 5px; cursor: pointer; pointer-events: auto;
+            box-shadow: 0 0 10px #ff007f;
+        }
+    </style>
+    <!-- 引入 3D 引擎 Three.js 與 PubNub 雲端即時連線 SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.2.2.min.js"></script>
+</head>
+<body>
+
+    <canvas id="webgl-stage"></canvas>
+
+    <div id="ui-container">
+        <div class="system-announcement" id="announcement">
+            🌐 正在建立 911 多人元宇宙安全連線...
+        </div>
+        <div class="timer-box" id="timer-box">
+            距離 911 記憶大爆炸還有：<span id="countdown">00:00:00</span>
+        </div>
+    </div>
+
+    <!-- 手機虛擬搖桿 -->
+    <div id="joystick-zone">
+        <div id="joystick-stick"></div>
+    </div>
+
+    <!-- 方便老師提早實驗測試的祕密按鈕 -->
+    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆</button>
+
+    <script>
+        // === 0. 911 畢業班級名單與專屬祝福資料庫 ===
+        const graduationData = [
+            { id: "star_01", name: "01 王群叡", wish: "畢業快樂🎉" },
+            { id: "star_03", name: "03 吳沁璇", wish: "畢業快樂🎉" },
+            { id: "star_04", name: "04 洪可芸", wish: "畢業快樂🎉" },
+            { id: "star_06", name: "06 陳俞瑾", wish: "畢業快樂🎉" },
+            { id: "star_07", name: "07 陳晏秦", wish: "畢業快樂🎉" },
+            { id: "star_08", name: "08 楊善茹", wish: "畢業快樂🎉" },
+            { id: "star_21", name: "21 丁日初", wish: "畢業快樂🎉" },
+            { id: "star_22", name: "22 王宥淵", wish: "畢業快樂🎉" },
+            { id: "star_23", name: "23 李宣毅", wish: "畢業快樂🎉" },
+            { id: "star_24", name: "24 林秉豫", wish: "畢業快樂🎉" },
+            { id: "star_25", name: "25 吳少珷", wish: "畢業快樂🎉" },
+            { id: "star_26", name: "26 林延宥", wish: "延宥！雖然只帶你半學期，但你的學習與吸收能力驚人。未來的路上保持這份自信，勇敢 Debug 你的人生藍圖吧！" },
+            { id: "star_27", name: "27 徐亦祺", wish: "畢業快樂🎉" },
+            { id: "star_28", name: "28 陳又嘉", wish: "畢業快樂🎉" },
+            { id: "star_29", name: "29 陳品聿", wish: "畢業快樂🎉" },
+            { id: "star_30", name: "30 陳彥希", wish: "畢業快樂🎉" },
+            { id: "star_31", name: "31 陳楷育", wish: "畢業快樂🎉" },
+            { id: "star_33", name: "33 陳俊穎", wish: "畢業快樂🎉" },
+            { id: "star_34", name: "34 陳謙維", wish: "畢業快樂🎉" },
+            { id: "star_35", name: "35 黃唯軒", wish: "畢業快樂🎉" },
+            { id: "star_36", name: "36 梁普恩", wish: "畢業快樂🎉" },
+            { id: "star_37", name: "37 許洺齊", wish: "洺齊！這段時間看見你的成長與轉變，老師真的很欣慰。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
+            { id: "star_38", name: "38 蔡易辰", wish: "易辰！人生不要害怕遭遇 Compile Error，每一次的挫折與挑戰，都是讓你系統變得更完美的優化擴充。祝你未來一路順暢！" },
+            { id: "star_39", name: "39 楊予寬", wish: "畢業快樂🎉" },
+            { id: "star_40", name: "40 楊淞賁", wish: "畢業快樂🎉" },
+            { id: "star_41", name: "41 劉品樂", wish: "畢業快樂🎉" },
+            { id: "star_42", name: "42 鐘蕓伸", wish: "畢業快樂🎉" }
+        ];
+
+        const pCount = graduationData.length; 
+
+        // === 1. 初始化 3D 場景 ===
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020206);
+        scene.fog = new THREE.FogExp2(0x020206, 0.012);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-stage'), antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const pointLight = new THREE.PointLight(0x00ff9d, 2, 300);
+        pointLight.position.set(0, 25, 0);
+        scene.add(pointLight);
+
+        // 建立初始世界物件
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ color: 0x0c0c1a, roughness: 0.85 }));
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        const centerPlatform = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 0.3, 32), new THREE.MeshStandardMaterial({ color: 0xff007f, emissive: 0xff007f, emissiveIntensity: 0.5 }));
+        scene.add(centerPlatform);
+
+        // === 2. 多人連線與角色生成 ===
+        const myID = "911_" + Math.floor(Math.random() * 10000);
+        const otherPlayers = {};
+
+        function createPlayerMesh(color, isMe) {
+            const group = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 1.6), new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: isMe ? 0.3 : 0.1 }));
+            body.position.y = 1.1;
+            group.add(body);
+            return group;
+        }
+
+        const player = createPlayerMesh(0x00ff9d, true);
+        player.position.set((Math.random()-0.5)*40, 0, (Math.random()-0.5)*40);
+        scene.add(player);
+
+        // PubNub 雲端即時連線
+        const pubnub = new PubNub({
+            publishKey: 'pub-c-8be92bd3-2ea4-4866-9df3-010bd71a3983', 
+            subscribeKey: 'sub-c-e1cf80fe-fc9d-11e8-a72a-9e11ebaa642c',
+            userId: myID
+        });
+
+        pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
+        pubnub.addListener({
+            message: function(event) {
+                const data = event.message;
+                if (data.id !== myID && blastStage === 0) {
+                    if (!otherPlayers[data.id]) {
+                        otherPlayers[data.id] = createPlayerMesh(Math.random() * 0xffffff, false);
+                        scene.add(otherPlayers[data.id]);
+                    }
+                    otherPlayers[data.id].position.set(data.x, data.y, data.z);
+                }
+            },
+            presence: function(event) {
+                if ((event.action === 'leave' || event.action === 'timeout') && otherPlayers[event.uuid]) {
+                    scene.remove(otherPlayers[event.uuid]);
+                    delete otherPlayers[event.uuid];
+                }
+            }
+        });
+
+        document.getElementById('announcement').innerHTML = "🌐 連線成功！已進入 911 虛擬教室。<br>使用 鍵盤WASD 或 左下角搖桿 控制綠色小人移動。";
+
+        // === 3. 移動控制核心 ===
+        const keys = { w:0, a:0, s:0, d:0 };
+        window.addEventListener('keydown', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = 1; });
+        window.addEventListener('keyup', (e) => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = 0; });
+
+        const joystickZone = document.getElementById('joystick-zone');
+        const joystickStick = document.getElementById('joystick-stick');
+        let moveDir = { x: 0, z: 0 };
+
+        joystickZone.addEventListener('touchmove', (e) => {
+            const rect = joystickZone.getBoundingClientRect();
+            const touch = e.touches[0];
+            let fx = touch.clientX - (rect.left + 55);
+            let fy = touch.clientY - (rect.top + 55);
+            const dist = Math.sqrt(fx*fx + fy*fy);
+            if(dist > 35) { fx = (fx/dist)*35; fy = (fy/dist)*35; }
+            joystickStick.style.transform = `translate(${fx}px, ${fy}px)`;
+            moveDir.x = fx / 35; moveDir.z = fy / 35;
+        }, { passive: true });
+
+        joystickZone.addEventListener('touchend', () => {
+            joystickStick.style.transform = `translate(0px, 0px)`;
+            moveDir = { x: 0, z: 0 };
+        });
+
+        let lastBroadcast = 0;
+        function updateMovement() {
+            if (blastStage > 0) return;
+            let isMoving = false;
+            if(keys.w) { player.position.z -= 0.35; isMoving = true; }
+            if(keys.s) { player.position.z += 0.35; isMoving = true; }
+            if(keys.a) { player.position.x -= 0.35; isMoving = true; }
+            if(keys.d) { player.position.x += 0.35; isMoving = true; }
+            
+            if(moveDir.x !== 0 || moveDir.z !== 0) {
+                player.position.x += moveDir.x * 0.35;
+                player.position.z += moveDir.z * 0.35;
+                isMoving = true;
+            }
+
+            camera.position.set(player.position.x, player.position.y + 9, player.position.z + 16);
+            camera.lookAt(player.position);
+
+            const now = performance.now();
+            if (isMoving && now - lastBroadcast > 50) {
+                pubnub.publish({
+                    channel: 'class_911_metaverse',
+                    message: { id: myID, x: player.position.x, y: player.position.y, z: player.position.z }
+                });
+                lastBroadcast = now;
+            }
+        }
+
+        // === 4. 排程時間與大爆炸演算法 ===
+        const targetTime = new Date("June 19, 2026 20:00:00").getTime(); 
+        let blastStage = 0; 
+        let fireworkParticles;
+        let starSphereGroup = new THREE.Group(); 
+        scene.add(starSphereGroup);
+        const spherePositions = [];
+        const velocities = [];
+
+        function updateTimeline() {
+            if (blastStage > 0) return;
+            const now = new Date().getTime();
+            const distance = targetTime - now;
+
+            if (distance <= 0) {
+                document.getElementById('countdown').innerText = "00:00:00";
+                triggerMemoryBlast();
+            } else {
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+            }
+        }
+
+        function triggerMemoryBlast() {
+            if(blastStage > 0) return;
+            blastStage = 1;
+            
+            // 隱藏倒數與控制UI
+            document.getElementById('timer-box').classList.add('hidden');
+            document.getElementById('joystick-zone').classList.add('hidden');
+            if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
+
+            // 碎裂舊世界
+            scene.children = scene.children.filter(c => c === starSphereGroup || c.type === "AmbientLight" || c.type === "PointLight");
+
+            const announceBox = document.getElementById('announcement');
+            announceBox.style.borderColor = "#ff007f";
+            announceBox.innerHTML = "💥 【911 系統重構中】記憶數據正在升維排列...<br>請靜待星空凝聚。";
+
+            const geom = new THREE.BufferGeometry();
+            const currentPositions = [];
+            const colors = [];
+
+            for (let i = 0; i < pCount; i++) {
+                currentPositions.push(0, 18, 0);
+                velocities.push((Math.random() - 0.5) * 3.5, (Math.random() - 0.5) * 3.5, (Math.random() - 0.5) * 3.5);
+                
+                // 計算球面上目標位置
+                const radius = 22;
+                const u = Math.random(); const v = Math.random();
+                const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
+                spherePositions.push(radius * Math.sin(phi) * Math.cos(theta), radius * Math.sin(phi) * Math.sin(theta) + 18, radius * Math.cos(phi));
+                
+                // 科技霓虹色系粒子
+                colors.push(0.0, 1.0, 0.61); 
+            }
+
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(currentPositions, 3));
+            geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            
+            fireworkParticles = new THREE.Points(geom, new THREE.PointsMaterial({ size: 0.7, vertexColors: true, transparent: true, opacity: 1.0 }));
+            scene.add(fireworkParticles);
+
+            // 2.5秒後聚集成自轉星球
+            setTimeout(() => {
+                blastStage = 2;
+                scene.remove(fireworkParticles);
+                buildMemorySphere();
+            }, 2500);
+        }
+
+        // === 5. 記憶星球互動系統 ===
+        const starMeshes = [];
+        function buildMemorySphere() {
+            starSphereGroup.position.set(0, 18, 0);
+            document.getElementById('announcement').innerHTML = "✨【911 記憶星球】凝聚成功！<br>👉 運用滑鼠/手指「滑動旋轉星空」，點擊屬於你的星星解鎖資訊老師的卡片。";
+
+            graduationData.forEach((student, index) => {
+                const idx = index * 3;
+                const starGeo = new THREE.SphereGeometry(0.6, 12, 12);
+                const starMat = new THREE.MeshStandardMaterial({ color: 0x00ff9d, emissive: 0x00ff9d, emissiveIntensity: 0.9, roughness: 0.1 });
+                const mesh = new THREE.Mesh(starGeo, starMat);
+                
+                mesh.position.set(spherePositions[idx], spherePositions[idx+1] - 18, spherePositions[idx+2]);
+                mesh.userData = { studentInfo: student };
+                
+                starSphereGroup.add(mesh);
+                starMeshes.push(mesh);
+            });
+
+            camera.position.set(0, 18, 52);
+            camera.lookAt(0, 18, 0);
+        }
+
+        // 觸控與拖拽操控旋轉
+        let isDragging = false; let prevMousePosition = { x: 0, y: 0 }; let isUserInteracting = false;
+        
+        function dragStart(x, y) { isDragging = true; prevMousePosition = { x, y }; }
+        function dragMove(x, y) {
+            if (!isDragging || blastStage !== 2) return;
+            const deltaX = x - prevMousePosition.x;
+            const deltaY = y - prevMousePosition.y;
+            starSphereGroup.rotation.y += deltaX * 0.005;
+            starSphereGroup.rotation.x += deltaY * 0.005;
+            isUserInteracting = true;
+            prevMousePosition = { x, y };
+        }
+        function dragEnd() { isDragging = false; setTimeout(() => { isUserInteracting = false; }, 2500); }
+
+        window.addEventListener('mousedown', (e) => dragStart(e.clientX, e.clientY));
+        window.addEventListener('mousemove', (e) => dragMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', dragEnd);
+
+        window.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+        window.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+        window.addEventListener('touchend', dragEnd);
+
+        // 射線雷射偵測星星點擊
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function checkClick(clientX, clientY) {
+            if (blastStage !== 2) return;
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(starMeshes);
+
+            if (intersects.length > 0) {
+                const star = intersects[0].object;
+                const info = star.userData.studentInfo;
+                
+                star.material.color.setHex(0xff007f);
+                star.scale.set(2.2, 2.2, 2.2);
+                setTimeout(() => { star.scale.set(1,1,1); star.material.color.setHex(0x00ff9d); }, 1200);
+
+                // 彈出專屬祝福視窗
+                setTimeout(() => {
+                    alert(`🌟【911 ${info.name} 的專屬記憶星】🌟\n\n老師有話對你說：\n${info.wish}`);
+                }, 50);
+            }
+        }
+        window.addEventListener('click', (e) => checkClick(e.clientX, e.clientY));
+
+        // === 6. 核心繪製與動力學循環 ===
+        function animate() {
+            requestAnimationFrame(animate);
+            updateMovement();
+            updateTimeline();
+
+            // 爆炸擴散運動
+            if (blastStage === 1 && fireworkParticles) {
+                const posArr = fireworkParticles.geometry.attributes.position.array;
+                for (let i = 0; i < posArr.length / 3; i++) {
+                    posArr[i*3] += velocities[i*3];
+                    posArr[i*3+1] += velocities[i*3+1];
+                    posArr[i*3+2] += velocities[i*3+2];
+                    velocities[i*3] *= 0.97; velocities[i*3+1] *= 0.97; velocities[i*3+2] *= 0.97; // 阻力
+                }
+                fireworkParticles.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // 星球慢速自轉
+            if (blastStage === 2 && !isUserInteracting) {
+                starSphereGroup.rotation.y += 0.0025;
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 視窗縮放自適應
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
