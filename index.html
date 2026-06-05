@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>911 3D 大安元宇宙：終焉星河</title>
+    <title>911 元宇宙：終焉星河</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -121,19 +121,19 @@
         <div id="typewriter-text"></div>
     </div>
 
-    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
+    <!-- <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button> -->
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
-            🌐 正在建立 911 大安元宇宙安全連線...
+            🌐 正在建立 911 元宇宙安全連線...
         </div>
         <div class="timer-box" id="timer-box">
-            距離大安新大樓記憶爆炸還有：<span id="countdown">00:00:00</span>
+            距離記憶煙火爆炸還有：<span id="countdown">00:00:00</span>
         </div>
     </div>
 
     <div id="search-container" class="hidden">
-        <input type="text" id="search-input" placeholder="輸入座號(如:26)或姓名定位星星...">
+        <input type="text" id="search-input" placeholder="輸入座號(如:01)或姓名定位星星...">
         <button id="search-btn" onclick="searchMyStar()">LOCATE</button>
     </div>
 
@@ -143,9 +143,9 @@
 
     <script>
         // === 0.0 進入網頁前問姓名座號 ===
-        let myUsername = prompt("【911 畢業限定】請輸入你的座號與名字 (例如: 26 林延宥)", "");
+        let myUsername = prompt("【911 畢業限定】請輸入你的座號或名字或綽號", "");
         if(!myUsername || myUsername.trim() === "") {
-            myUsername = "匿名大安人_" + Math.floor(Math.random() * 900 + 100);
+            myUsername = "匿名人_" + Math.floor(Math.random() * 900 + 100);
         }
 
         // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
@@ -182,7 +182,7 @@
         const pCount = graduationData.length; 
 
         // 🚀 老師可以在這裡自由修改大爆炸後想對全班講的感言話語 (\n 代表換行)
-        const teacherSpeech = "⚡ [911 核心通訊端已建立]...\n\n雖然只帶了你們短短半學期，\n但你們這群孩子的活力，已經寫進了我的核心記憶體中。\n\n人生這場程式碼，難免遇到 Compile Error 或 Bug，\n但請記住，每次的挫折，都是系統優化的重磅契機。\n\n勇敢地去編寫屬於你們自己的未來吧！\n畢業快樂！\n\n—— 資訊老師 2026.06.05";
+        const teacherSpeech = "⚡ [911 核心通訊端已建立]...\n\n雖然只帶了你們短短半學期，\n但你們這群孩子的活力，已經寫進了我的核心記憶體中。\n\n人生這場程式碼，難免遇到 Compile Error 或 Bug，\n但請記住，每次的挫折，都是系統優化的重磅契機。\n\n勇敢地去編寫屬於你們自己的未來吧！\n畢業快樂！\n\n—— 生科老師 ＠chengwei_2232 2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
@@ -293,7 +293,7 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        document.getElementById('announcement').innerHTML = `🏫 歡迎 <b>${myUsername}</b> 進入大安元宇宙空間。`;
+        document.getElementById('announcement').innerHTML = `🏫 歡迎 <b>${myUsername}</b> 進入911元宇宙空間。`;
 
         // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
