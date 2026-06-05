@@ -121,7 +121,7 @@
         <div id="typewriter-text"></div>
     </div>
 
-    <!-- <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button> -->
+    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
@@ -192,7 +192,6 @@
         textureLoader.load('daan.jpeg', function(texture) {
             scene.background = texture; 
         }, undefined, function(err) {
-            // 如果你圖片附檔名是 .jpg，記得把上面 'daan.png' 改成 'daan.jpg'
             scene.background = new THREE.Color(0x0e0e1a);
         });
 
@@ -341,7 +340,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        // 🚀 測試時間精準綁定在今晚 22:00:00 
+        // 🚀 核心修改：排程目標時間精準修改在 2026/06/09 晚上 22:00:00 準時自動大爆炸
         const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
@@ -428,10 +427,8 @@
                 if (index < teacherSpeech.length) {
                     textBox.innerText += teacherSpeech.charAt(index);
                     index++;
-                    // 控制打字機速度 (每 45 毫秒敲一個字，極具節奏感)
                     setTimeout(type, 80); 
                 } else {
-                    // 字全部打完後，原地停留 3.5 秒供學生細細閱讀，隨後進入「階段三：緩緩收縮凝聚」
                     setTimeout(() => {
                         screen.style.transition = "opacity 1s ease";
                         screen.style.opacity = 0;
@@ -491,7 +488,7 @@
                 isTrackingCamera = true; isUserInteracting = true; 
 
                 setTimeout(() => {
-                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\n資訊老師心裡話：\n${info.wish}`);
+                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\n生科老師偷偷說：\n${info.wish}`);
                     targetStar.scale.set(1, 1, 1); targetStar.material.color.setHex(0x00ff9d); targetStar.material.emissive.setHex(0x00ff9d);
                     isTrackingCamera = false; isUserInteracting = false; resetCamera();
                 }, 1500); 
@@ -560,14 +557,12 @@
 
                 for (let i = 0; i < posArr.length / 3; i++) {
                     const idx = i * 3;
-                    // 將每顆粒子平滑流暢地吸向未來的球面位置
                     posArr[idx] += (spherePositions[idx] - posArr[idx]) * 0.045;
                     posArr[idx+1] += (spherePositions[idx+1] - posArr[idx+1]) * 0.045;
                     posArr[idx+2] += (spherePositions[idx+2] - posArr[idx+2]) * 0.045;
                 }
                 fireworkParticles.geometry.attributes.position.needsUpdate = true;
 
-                // 收縮完畢，秒速切換到「狀態 4：星球正式激活自轉」並秀出搜尋框
                 if(gatherProgress >= 1.0) {
                     blastStage = 4;
                     scene.remove(fireworkParticles);
