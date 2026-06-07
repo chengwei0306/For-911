@@ -23,7 +23,7 @@
             transition: background 0.5s ease;
         }
 
-        /* 🎯 右上角極簡圓形音樂按鈕 */
+        /* 右上角極簡圓形音樂按鈕 */
         #audio-toggle-btn {
             position: absolute; top: 20px; right: 20px; z-index: 1000;
             background: rgba(10, 10, 25, 0.85); color: #ff007f;
@@ -38,6 +38,36 @@
             box-shadow: 0 0 25px #ff007f;
             transform: scale(1.08);
         }
+
+        /* 🎯 核心修改：全新科技風發光圖文彈出視窗 CSS */
+        #custom-modal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            z-index: 2000; width: 85%; max-width: 420px;
+            background: rgba(6, 6, 20, 0.95); border: 2px solid #00ff9d;
+            box-shadow: 0 0 30px rgba(0, 255, 157, 0.4);
+            border-radius: 16px; padding: 25px; box-sizing: border-box;
+            color: #fff; text-align: center; font-family: "Microsoft JhengHei", sans-serif;
+            opacity: 0; pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #custom-modal.active {
+            opacity: 1; pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        #modal-title {
+            color: #ff007f; font-size: 18px; font-weight: bold;
+            margin-bottom: 15px; text-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+        }
+        #modal-body {
+            font-size: 15px; line-height: 1.6; white-space: pre-wrap;
+            margin-bottom: 20px; color: #e0e0ff; text-align: left;
+        }
+        #modal-close-btn {
+            background: #00ff9d; color: #000; border: none;
+            padding: 10px 30px; font-weight: bold; border-radius: 25px;
+            cursor: pointer; box-shadow: 0 0 10px #00ff9d; font-size: 14px;
+        }
+        #modal-close-btn:hover { background: #fff; box-shadow: 0 0 15px #00ff9d; }
 
         /* 全螢幕打字機黑客幕 */
         #typewriter-screen {
@@ -135,11 +165,13 @@
 
     <button id="audio-toggle-btn" onclick="toggleAudioSystem()">🎵</button>
 
-    <div id="typewriter-screen" class="hidden">
-        <div id="typewriter-text"></div>
+    <div id="custom-modal">
+        <div id="modal-title">🌟 星河回憶結晶 🌟</div>
+        <div id="modal-body"></div>
+        <button id="modal-close-btn" onclick="closeCustomModal()">CLOSE</button>
     </div>
 
-    <!-- <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button> -->
+    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
@@ -166,8 +198,8 @@
         const audioPiano = new Audio('bgm_piano.mp3'); audioPiano.loop = true; audioPiano.volume = 0.7;
 
         let isTickingPlaying = false;
-        let isAudioPlaying = true;    // 預設設定為「開啟音樂」狀態
-        let isAudioUnlocked = false;   // 標記音訊通道是否已被解鎖放行
+        let isAudioPlaying = true;    
+        let isAudioUnlocked = false;   
 
         // === 0.0 進入網頁前問姓名座號 ===
         let myUsername = prompt("【911 限定】請輸入你的座號或名字或綽號", "");
@@ -175,12 +207,11 @@
             myUsername = "棋手_" + Math.floor(Math.random() * 900 + 100);
         }
 
-        // 🎯 全域自動啟動播放器
         function autoStartAudioSystem() {
             if (!isAudioUnlocked && isAudioPlaying) {
                 isAudioUnlocked = true;
                 if (blastStage === 0) {
-                    audioWorld.play().catch(e => console.log("等待放行:", e));
+                    audioWorld.play().catch(e => console.log(e));
                     if (isTickingPlaying) audioTicking.play().catch(e => console.log(e));
                 } else {
                     audioPiano.play().catch(e => console.log(e));
@@ -193,7 +224,6 @@
         window.addEventListener('click', autoStartAudioSystem);
         window.addEventListener('touchstart', autoStartAudioSystem, { passive: true });
 
-        // 🎯 右上角極簡按鈕手動控制切換
         function toggleAudioSystem() {
             if (!isAudioPlaying) {
                 isAudioPlaying = true;
@@ -212,24 +242,22 @@
             }
         }
 
-        // 🎯 極簡圖示與外觀切換控制
         function updateAudioButtonUI(isPlaying) {
             const btn = document.getElementById('audio-toggle-btn');
             if (btn) {
                 if (isPlaying) {
-                    btn.innerHTML = "🎵"; // 播放中顯示五線譜
+                    btn.innerHTML = "🎵";
                     btn.style.borderColor = "#ff007f"; btn.style.color = "#ff007f";
                     btn.style.boxShadow = "0 0 15px rgba(255, 0, 127, 0.3)";
                 } else {
-                    btn.innerHTML = "🔇"; // 靜音中顯示靜音符號
+                    btn.innerHTML = "🔇";
                     btn.style.borderColor = "#00ff9d"; btn.style.color = "#00ff9d";
                     btn.style.boxShadow = "0 0 15px rgba(0, 255, 157, 0.3)";
                 }
             }
         }
 
-        // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
-        // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
+        // === 0.1 911 畢業班級名單與專屬祝福資料庫（內建 60 顆星與新祝詞） ===
         const graduationData = [
             { id: "star_01", seat: "01", name: "王群叡", wish: "群叡，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_03", seat: "03", name: "吳沁璇", wish: "沁璇，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
@@ -242,7 +270,7 @@
             { id: "star_23", seat: "23", name: "李宣毅", wish: "宣毅，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_24", seat: "24", name: "林秉豫", wish: "秉豫，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_25", seat: "25", name: "吳少珷", wish: "少珷，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
-            { id: "star_26", seat: "26", name: "林延宥", wish: "延宥！雖然只帶你半學期，但你的學習與吸收能力很優秀是個不可多得的人才。未來的路上保持這份自信、勇敢，開創屬於你的人生藍圖！畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
+            { id: "star_26", seat: "26", name: "林延宥", wish: "延宥！雖然只帶你半學期，但你的學習與吸收能力很優秀是個不可多得的人才。未來的路上保持這份自信、勇敢，開創屬於你的人生藍圖！" },
             { id: "star_27", seat: "27", name: "徐亦祺", wish: "亦祺，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_28", seat: "28", name: "陳又嘉", wish: "又嘉，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_29", seat: "29", name: "陳品聿", wish: "品聿，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
@@ -252,17 +280,37 @@
             { id: "star_34", seat: "34", name: "陳謙維", wish: "謙維，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_35", seat: "35", name: "黃唯軒", wish: "唯軒，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_36", seat: "36", name: "梁普恩", wish: "普恩，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
-            { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長，老師真的覺得你是有潛力的一顆星。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
-            { id: "star_38", seat: "38", name: "蔡易辰", wish: "易辰！人生不要害怕遭遇 Error，每一次的挫折與挑戰，都是讓你人生系統變得更完美更優秀。祝你未來遇到挫折，都能迎刃而解！畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
+            { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長，老師真的覺得你是有潛力的一顆星。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
+            { id: "star_38", seat: "38", name: "蔡易辰", wish: "易辰！人生不要害怕遭遇 Error，每一次的挫折與挑戰，都是讓你人生系統變得更完美更優秀。祝你未來遇到挫折，都能迎刃而解！" },
             { id: "star_39", seat: "39", name: "楊予寬", wish: "予寬，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_40", seat: "40", name: "楊淞賁", wish: "淞賁，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_41", seat: "41", name: "劉品樂", wish: "品樂，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
-            { id: "star_42", seat: "42", name: "鐘蕓伸", wish: "蕓伸，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" }
+            { id: "star_42", seat: "42", name: "鐘蕓伸", wish: "蕓伸，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
+            
+            // 🌟 43 ~ 60 號隱藏版彩蛋星群（wish 欄位可自由塞入 <img> 標籤） 🌟
+            { id: "star_43", seat: "43", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 43 號神祕星體！\n你竟然連這裡都能搜到，看來有當工程師的潛力喔！" },
+            { id: "star_44", seat: "44", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 44 號神祕星體！\n恭喜解鎖隱藏回憶，有找到其他同學的星星了嗎？" },
+            { id: "star_45", seat: "45", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 45 號神祕星體！\n大驚喜！你抓到了一顆流星 🌠" },
+            { id: "star_46", seat: "46", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 46 號神祕星體！\n看來 911 的棋手都很擅長探索宇宙呢！" },
+            { id: "star_47", seat: "47", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 47 號神祕星體！\n彩蛋內容等生科老師想到更有趣的點子再塞進來！" },
+            { id: "star_48", seat: "48", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 48 號神祕星體！\n恭喜你發現宇宙隱藏的圍棋定式！" },
+            { id: "star_49", seat: "49", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 49 號神祕星體！\n距離滿星 60 顆不遠了，繼續尋寶吧！" },
+            { id: "star_50", seat: "50", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 50 號神祕星體！\n達成了尋找彩蛋的里程碑！" },
+            { id: "star_51", seat: "51", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 51 號神祕星體！\n這裡空空如也，只有滿滿的畢業祝福！" },
+            { id: "star_52", seat: "52", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 52 號神祕星體！\n落子無悔，勇敢前行！" },
+            { id: "star_53", seat: "53", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 53 號神祕星體！\n如果你想在這裡放圖，可以直接寫：\n<img src='你的圖檔.jpg' style='width:100%; border-radius:8px;'>" },
+            { id: "star_54", seat: "54", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 54 號神祕星體！\n程式運作一切正常，沒有 Bug，只有好運！" },
+            { id: "star_55", seat: "55", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 55 號神祕星體！\n點擊其他星星可以看見同學們的專屬回憶喔！" },
+            { id: "star_56", seat: "56", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 56 號神祕星體！\n恭喜你來到宇宙的深處。" },
+            { id: "star_57", seat: "57", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 57 號神祕星體！\n保持好奇心，這是最棒的 Debug 工具！" },
+            { id: "star_58", seat: "58", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 58 號神祕星體！\n九一一宇宙即將擴充完畢..." },
+            { id: "star_59", seat: "59", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 59 號神祕星體！\n倒數第二顆彩蛋，被你抓到了！" },
+            { id: "star_60", seat: "60", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 60 號終極星體！\n哇！你把 60 顆星全部通關了！恭喜畢業！" }
         ];
 
         const pCount = graduationData.length; 
 
-        const teacherSpeech = "⚡ [911 核心通訊已連接]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，然後一些人請假所以我們有點不熟哈哈哈 \n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n—— ＠chengwei_2232 \n2026.06.09";
+        const teacherSpeech = "⚡ [911 核心通訊已連接]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n——＠chengwei_2232 \n2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
@@ -432,7 +480,7 @@
             const rect = joystickZone.getBoundingClientRect(); const touch = e.touches[0];
             let fx = touch.clientX - (rect.left + 55); let fy = touch.clientY - (rect.top + 55);
             const dist = Math.sqrt(fx*fx + fy*fy);
-            if(dist > 35) { fx = (fx/dist)*35; fy = (fy/dist)*35; }
+            if(dist > 35) { fx = (fx/dist)*35; fy = (dist/35)*35; }
             joystickStick.style.transform = `translate(${fx}px, ${fy}px)`;
             moveDir.x = fx / 35; moveDir.z = fy / 35;
         }, { passive: true });
@@ -465,7 +513,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        const targetTime = new Date("June 7, 2026 23:20:00").getTime(); 
+        const targetTime = new Date("June 7, 2026 23:42:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -496,7 +544,6 @@
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
             
-            // 🎯 倒數 15 秒自動切入滴答音效
             if (hours === 0 && minutes === 0 && distance <= 15000 && distance > 0) {
                 if (!isTickingPlaying) {
                     isTickingPlaying = true;
@@ -604,12 +651,18 @@
                 audioPiano.play().catch(e => console.log(e));
             }
 
+            // 🎯 為了解決 60 顆星高密度排開，將包圍半徑拉大到 24，視覺更震撼！
             graduationData.forEach((student, index) => {
-                const idx = index * 3;
+                const radius = 24; const u = Math.random(); const v = Math.random();
+                const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
+                const sx = radius * Math.sin(phi) * Math.cos(theta);
+                const sy = radius * Math.sin(phi) * Math.sin(theta);
+                const sz = radius * Math.cos(phi);
+
                 const starGeo = new THREE.IcosahedronGeometry(0.7, 0); 
                 const starMat = new THREE.MeshStandardMaterial({ color: 0x00ff9d, emissive: 0x00ff9d, emissiveIntensity: 0.8, roughness: 0.1 });
                 const mesh = new THREE.Mesh(starGeo, starMat);
-                mesh.position.set(spherePositions[idx], spherePositions[idx+1] - 18, spherePositions[idx+2]);
+                mesh.position.set(sx, sy, sz);
                 mesh.userData = { studentInfo: student };
                 starSphereGroup.add(mesh);
                 starMeshes.push(mesh);
@@ -617,13 +670,24 @@
             resetCamera();
         }
 
-        function resetCamera() { camera.position.set(0, 18, 52); camera.lookAt(0, 18, 0); }
+        function resetCamera() { camera.position.set(0, 18, 55); camera.lookAt(0, 18, 0); }
 
         let isTrackingCamera = false; let camTargetPos = new THREE.Vector3();
 
+        // 🎯 核心修改：將原本純文字的 alert 升級成網頁圖文 Modal 發光視窗！
+        function openCustomModal(titleText, bodyHtml) {
+            document.getElementById('modal-title').innerHTML = titleText;
+            document.getElementById('modal-body').innerHTML = bodyHtml;
+            document.getElementById('custom-modal').classList.add('active');
+        }
+        function closeCustomModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+            isTrackingCamera = false; isUserInteracting = false; resetCamera();
+        }
+
         function searchMyStar() {
             const query = document.getElementById('search-input').value.trim().toLowerCase();
-            if(!query) return alert("請輸入座號或姓名！");
+            if(!query) return;
 
             const targetStar = starMeshes.find(star => {
                 const info = star.userData.studentInfo;
@@ -643,11 +707,11 @@
                 isTrackingCamera = true; isUserInteracting = true; 
 
                 setTimeout(() => {
-                    alert(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟\n\n生科老師心裡話：\n${info.wish}`);
+                    // 呼叫全新的圖文視窗
+                    openCustomModal(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟`, info.wish);
                     targetStar.scale.set(1, 1, 1); targetStar.material.color.setHex(0x00ff9d); targetStar.material.emissive.setHex(0x00ff9d);
-                    isTrackingCamera = false; isUserInteracting = false; resetCamera();
                 }, 1500); 
-            } else { alert("找不到對應的同學！"); }
+            } else { alert("找不到對應的同學或彩蛋座號喔！"); }
         }
 
         // 觸控拖曳
@@ -670,7 +734,7 @@
 
         const raycaster = new THREE.Raycaster();
         window.addEventListener('click', (e) => {
-            if (blastStage !== 4 || isTrackingCamera || e.target.id === "search-input" || e.target.id === "search-btn") return;
+            if (blastStage !== 4 || isTrackingCamera || e.target.id === "search-input" || e.target.id === "search-btn" || e.target.id === "modal-close-btn") return;
             const mouse = new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
             raycaster.setFromCamera(mouse, camera);
             const intersects = raycaster.intersectObjects(starMeshes);
