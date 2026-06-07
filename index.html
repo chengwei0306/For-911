@@ -142,11 +142,27 @@
     </div>
 
     <script>
+        // === 🎵 音樂與音效控制通道 ===
+        const audioWorld = new Audio('bgm_world.mp3');
+        audioWorld.loop = true; // 設定世界崩塌音樂無限循環
+        audioWorld.volume = 0.6; // 音量 (0.0 到 1.0)
+
+        const audioTicking = new Audio('ticking.mp3');
+        audioTicking.loop = true; // 倒數滴答聲循環
+        audioTicking.volume = 0.4;
+
+        const audioPiano = new Audio('bgm_piano.mp3');
+        audioPiano.loop = true; // 沉重鋼琴音樂循環
+        audioPiano.volume = 0.7;
+
+        let isTickingPlaying = false; // 防範音效重複觸發的旗標
+        
         // === 0.0 進入網頁前問姓名座號 ===
         let myUsername = prompt("【911 限定】請輸入你的座號或名字或綽號", "");
         if(!myUsername || myUsername.trim() === "") {
             myUsername = "棋手_" + Math.floor(Math.random() * 900 + 100);
         }
+        audioWorld.play().catch(e => console.log("等待使用者點擊互動後播放"));
 
         // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
         const graduationData = [
@@ -388,7 +404,7 @@
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
         // 🚀 正式時間請改回您需要的 6 月 9 日晚上 22:00:00
-        const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
+        const targetTime = new Date("June 7, 2026 23:00:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -418,12 +434,25 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+            // 🎯 【新增音樂邏輯】：當倒數計時小於 15 秒（且小時與分鐘歸零）時，切入滴答滴答聲
+                if (hours === 0 && minutes === 0 && distance <= 15000 && distance > 0) {
+                    if (!isTickingPlaying) {
+                        audioTicking.play().catch(e => console.log(e));
+                        isTickingPlaying = true;
+                        // 可選：將世界崩塌音樂音量變小，突顯滴答聲的窒息感
+                        audioWorld.volume = 0.2; 
+                    }
+                }
         }
 
         // 階段一：棋局大爆炸
         function triggerMemoryBlast() {
             if(blastStage > 0) return;
             blastStage = 1;
+            // 🎯 【新增音樂切換】：引爆一瞬間，關閉前面所有音樂，炸出沉重鋼琴聲！
+            audioWorld.pause();    // 停止世界崩塌音樂
+            audioTicking.pause();  // 停止滴答滴答聲
+            audioPiano.play().catch(e => console.log("鋼琴音樂播放失敗:", e)); // 啟動沉重鋼琴 BGM
             
             // 正常爆炸時，強制洗掉大安背景圖與遮罩
             document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`;
