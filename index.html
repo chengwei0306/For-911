@@ -23,6 +23,23 @@
             transition: background 0.5s ease;
         }
 
+        /* 🎯 右上角發光音樂控制按鈕 */
+        #audio-toggle-btn {
+            position: absolute; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(10, 10, 25, 0.85); color: #00ff9d;
+            border: 2px solid #00ff9d; padding: 10px 18px;
+            font-size: 14px; font-weight: bold; font-family: monospace, "Microsoft JhengHei";
+            border-radius: 30px; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+        #audio-toggle-btn:hover {
+            background: #00ff9d; color: #000;
+            box-shadow: 0 0 25px #00ff9d;
+            transform: scale(1.05);
+        }
+
         /* 全螢幕打字機黑客幕 */
         #typewriter-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -117,6 +134,8 @@
     <canvas id="webgl-stage"></canvas>
     <div id="sky-mask"></div>
 
+    <button id="audio-toggle-btn" onclick="toggleAudioSystem()">🎵 啟動音效通道</button>
+
     <div id="typewriter-screen" class="hidden">
         <div id="typewriter-text"></div>
     </div>
@@ -128,7 +147,7 @@
             🌐 正在建立 911 圍棋元宇宙安全連線...
         </div>
         <div class="timer-box" id="timer-box">
-            距離記憶棋局大爆炸還有：<span id="countdown">00:00:00</span>
+            距離校園記憶崩塌還有：<span id="countdown">00:00:00</span>
         </div>
     </div>
 
@@ -143,26 +162,41 @@
 
     <script>
         // === 🎵 音樂與音效控制通道 ===
-        const audioWorld = new Audio('bgm_world.mp3');
-        audioWorld.loop = true; // 設定世界崩塌音樂無限循環
-        audioWorld.volume = 0.6; // 音量 (0.0 到 1.0)
+        const audioWorld = new Audio('bgm_world.mp3'); audioWorld.loop = true; audioWorld.volume = 0.6;
+        const audioTicking = new Audio('ticking.mp3'); audioTicking.loop = true; audioTicking.volume = 0.4;
+        const audioPiano = new Audio('bgm_piano.mp3'); audioPiano.loop = true; audioPiano.volume = 0.7;
 
-        const audioTicking = new Audio('ticking.mp3');
-        audioTicking.loop = true; // 倒數滴答聲循環
-        audioTicking.volume = 0.4;
-
-        const audioPiano = new Audio('bgm_piano.mp3');
-        audioPiano.loop = true; // 沉重鋼琴音樂循環
-        audioPiano.volume = 0.7;
-
-        let isTickingPlaying = false; // 防範音效重複觸發的旗標
+        let isTickingPlaying = false; 
+        let isAudioPlaying = false; // 記錄目前音樂是開啟還是靜音狀態
         
         // === 0.0 進入網頁前問姓名座號 ===
         let myUsername = prompt("【911 限定】請輸入你的座號或名字或綽號", "");
         if(!myUsername || myUsername.trim() === "") {
             myUsername = "棋手_" + Math.floor(Math.random() * 900 + 100);
         }
-        audioWorld.play().catch(e => console.log("等待使用者點擊互動後播放"));
+
+        // 🎯 右上角按鈕系統核心控制器
+        function toggleAudioSystem() {
+            const btn = document.getElementById('audio-toggle-btn');
+            if (!isAudioPlaying) {
+                if (blastStage === 0) {
+                    audioWorld.play().catch(e => console.log(e));
+                    if (isTickingPlaying) audioTicking.play().catch(e => console.log(e));
+                } else {
+                    audioPiano.play().catch(e => console.log(e));
+                }
+                isAudioPlaying = true;
+                btn.innerHTML = "🔊 靜音音樂";
+                btn.style.borderColor = "#ff007f"; btn.style.color = "#ff007f";
+                btn.style.boxShadow = "0 0 15px rgba(255, 0, 127, 0.3)";
+            } else {
+                audioWorld.pause(); audioTicking.pause(); audioPiano.pause();
+                isAudioPlaying = false;
+                btn.innerHTML = "🎵 開啟音樂";
+                btn.style.borderColor = "#00ff9d"; btn.style.color = "#00ff9d";
+                btn.style.boxShadow = "0 0 15px rgba(0, 255, 157, 0.3)";
+            }
+        }
 
         // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
         const graduationData = [
@@ -197,7 +231,7 @@
 
         const pCount = graduationData.length; 
 
-        const teacherSpeech = "⚡ [911 棋局核心通訊已建立]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n——＠chengwei_2232 \n2026.06.09";
+        const teacherSpeech = "⚡ [911 核心通訊已連接]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n——＠chengwei_2232 \n2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
@@ -205,7 +239,6 @@
         // 載入大安國中新大樓背景
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load('daan.jpeg', function(texture) {
-            // 只有在一開始倒數階段才需要大安背景
             if(blastStage === 0) scene.background = texture; 
         }, undefined, function(err) {
             if(blastStage === 0) scene.background = new THREE.Color(0x04040c);
@@ -354,8 +387,8 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        // 導引公告欄換行排版
-        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間<br>🌐 已建立 911 圍棋元宇宙安全連線...<br>按下 WASD 或 滑動搖桿 可以自由移動`;
+        // 導引公告欄換行與點擊提示排版
+        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間<br>🌐 已建立 911 元宇宙安全連線... (🎵 <b>請點右上方啟動音效</b>)<br>按下 WASD 或 滑動搖桿 可以自由移動`;
 
         // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
@@ -403,8 +436,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        // 🚀 正式時間請改回您需要的 6 月 9 日晚上 22:00:00
-        const targetTime = new Date("June 7, 2026 23:00:00").getTime(); 
+        const targetTime = new Date("June 7, 2026 23:10:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -434,27 +466,32 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
-            // 🎯 【新增音樂邏輯】：當倒數計時小於 15 秒（且小時與分鐘歸零）時，切入滴答滴答聲
-                if (hours === 0 && minutes === 0 && distance <= 15000 && distance > 0) {
-                    if (!isTickingPlaying) {
+            
+            // 🎯 【優化滴答音樂】：如果目前為開啟音樂狀態，最後15秒內自動淡入滴答音效
+            if (hours === 0 && minutes === 0 && distance <= 15000 && distance > 0) {
+                if (!isTickingPlaying) {
+                    isTickingPlaying = true;
+                    if (isAudioPlaying) {
                         audioTicking.play().catch(e => console.log(e));
-                        isTickingPlaying = true;
-                        // 可選：將世界崩塌音樂音量變小，突顯滴答聲的窒息感
-                        audioWorld.volume = 0.2; 
+                        audioWorld.volume = 0.15; 
                     }
                 }
+            }
         }
 
         // 階段一：棋局大爆炸
         function triggerMemoryBlast() {
             if(blastStage > 0) return;
             blastStage = 1;
-            // 🎯 【新增音樂切換】：引爆一瞬間，關閉前面所有音樂，炸出沉重鋼琴聲！
-            audioWorld.pause();    // 停止世界崩塌音樂
-            audioTicking.pause();  // 停止滴答滴答聲
-            audioPiano.play().catch(e => console.log("鋼琴音樂播放失敗:", e)); // 啟動沉重鋼琴 BGM
             
-            // 正常爆炸時，強制洗掉大安背景圖與遮罩
+            // 🎯 【優化大爆炸音軌切換】：若目前音樂處於播放狀態，切換至沉重鋼琴樂
+            if (isAudioPlaying) {
+                audioWorld.pause();
+                audioTicking.pause();
+                audioPiano.play().catch(e => console.log(e));
+                document.getElementById('audio-toggle-btn').innerHTML = "🔊 靜音音樂";
+            }
+
             document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`;
             ambientLight.intensity = 0.4;
             scene.background = new THREE.Color(0x020206); 
@@ -467,7 +504,7 @@
             for (let id in otherPlayers) { scene.remove(otherPlayers[id]); }
 
             camera.position.set(0, 22, 55); camera.lookAt(0, 18, 0);
-            document.getElementById('announcement').innerHTML = "💥 【911 棋局大爆炸】回憶黑白原子解構中...";
+            document.getElementById('announcement').innerHTML = "💥 【爆炸!】校園世界崩塌中...";
 
             const geom = new THREE.BufferGeometry(); const currentPositions = []; const colors = [];
             for (let i = 0; i < 600; i++) {
@@ -509,7 +546,7 @@
                         setTimeout(() => {
                             screen.classList.add('hidden');
                             blastStage = 3; 
-                            document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】黑白回憶子正緩緩凝聚為星球...";
+                            document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】破碎的回憶正緩緩凝聚為星球...";
                         }, 1000);
                     }, 3500);
                 }
@@ -517,7 +554,7 @@
             type();
         }
 
-        // 階段四：記憶星球激活自轉
+        // 階段四：記憶星球高階互動
         const starMeshes = [];
         function buildMemorySphere() {
             blastStage = 4; // 確保強制跳關時狀態正確被同步
@@ -526,6 +563,7 @@
 
             // 🎯【重磅修復核心】：不論是從倒數進來的，還是重新整理跳關進來的，一律強制用純黑深邃宇宙洗掉大安國中背景圖！
             scene.background = new THREE.Color(0x020206);
+            document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0fixed)`; 
             document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`; // 破除黑網
             
             // 同步隱藏一開始的走路UI與倒數計時框，防範跳關穿幫
@@ -542,6 +580,11 @@
 
             // 🎯【顯示搜尋框修正】：確保搜尋框重見天日
             document.getElementById('search-container').classList.remove('hidden');
+
+            // 🎯【防跳關沒聲音核心】：如果跳關進來且按鈕是開啟狀態，確保播放沉重鋼琴樂
+            if (isAudioPlaying && audioPiano.paused) {
+                audioPiano.play().catch(e => console.log(e));
+            }
 
             graduationData.forEach((student, index) => {
                 const idx = index * 3;
@@ -560,7 +603,6 @@
 
         let isTrackingCamera = false; let camTargetPos = new THREE.Vector3();
 
-        // 搜尋 3D 鏡頭自動插值追蹤演算法
         function searchMyStar() {
             const query = document.getElementById('search-input').value.trim().toLowerCase();
             if(!query) return alert("請輸入座號或姓名！");
