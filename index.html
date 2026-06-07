@@ -23,7 +23,7 @@
             transition: background 0.5s ease;
         }
 
-        /* 🎯 右上角極簡圓形音樂按鈕 */
+        /* 右上角極簡圓形音樂按鈕 */
         #audio-toggle-btn {
             position: absolute; top: 20px; right: 20px; z-index: 1000;
             background: rgba(10, 10, 25, 0.85); color: #ff007f;
@@ -39,7 +39,7 @@
             transform: scale(1.08);
         }
 
-        /* 🎯 星球階段專用：全新科技風發光圖文彈出視窗 CSS */
+        /* 星球階段專用：全新科技風發光圖文彈出視窗 CSS */
         #custom-modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
             z-index: 2000; width: 85%; max-width: 420px;
@@ -200,21 +200,20 @@
         const audioPiano = new Audio('bgm_piano.mp3'); audioPiano.loop = true; audioPiano.volume = 0.7;
 
         let isTickingPlaying = false;
-        let isAudioPlaying = true;    // 預設設定為「開啟音樂」狀態
-        let isAudioUnlocked = false;   // 標記音訊通道是否已被解鎖放行
-        
+        let isAudioPlaying = true;    
+        let isAudioUnlocked = false;   
+
         // === 0.0 進入網頁前問姓名座號 ===
         let myUsername = prompt("【911 限定】請輸入你的座號或名字或綽號", "");
         if(!myUsername || myUsername.trim() === "") {
             myUsername = "棋手_" + Math.floor(Math.random() * 900 + 100);
         }
 
-        // 🎯 全域自動啟動播放器
         function autoStartAudioSystem() {
             if (!isAudioUnlocked && isAudioPlaying) {
                 isAudioUnlocked = true;
                 if (blastStage === 0) {
-                    audioWorld.play().catch(e => console.log("等待放行:", e));
+                    audioWorld.play().catch(e => console.log(e));
                     if (isTickingPlaying) audioTicking.play().catch(e => console.log(e));
                 } else {
                     audioPiano.play().catch(e => console.log(e));
@@ -227,7 +226,6 @@
         window.addEventListener('click', autoStartAudioSystem);
         window.addEventListener('touchstart', autoStartAudioSystem, { passive: true });
 
-        // 🎯 右上角極簡按鈕手動控制切換
         function toggleAudioSystem() {
             if (!isAudioPlaying) {
                 isAudioPlaying = true;
@@ -246,23 +244,22 @@
             }
         }
 
-        // 🎯 極簡圖示與外觀切換控制
         function updateAudioButtonUI(isPlaying) {
             const btn = document.getElementById('audio-toggle-btn');
             if (btn) {
                 if (isPlaying) {
-                    btn.innerHTML = "🎵"; // 播放中顯示五線譜
+                    btn.innerHTML = "🎵";
                     btn.style.borderColor = "#ff007f"; btn.style.color = "#ff007f";
                     btn.style.boxShadow = "0 0 15px rgba(255, 0, 127, 0.3)";
                 } else {
-                    btn.innerHTML = "🔇"; // 靜音中顯示靜音符號
+                    btn.innerHTML = "🔇";
                     btn.style.borderColor = "#00ff9d"; btn.style.color = "#00ff9d";
                     btn.style.boxShadow = "0 0 15px rgba(0, 255, 157, 0.3)";
                 }
             }
         }
 
-        // === 0.1 911 畢業班級名單與專屬祝福資料庫（內建 60 顆滿星彩蛋名單） ===
+        // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
         const graduationData = [
             { id: "star_01", seat: "01", name: "王群叡", wish: "群叡，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_03", seat: "03", name: "吳沁璇", wish: "沁璇，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
@@ -292,13 +289,13 @@
             { id: "star_41", seat: "41", name: "劉品樂", wish: "品樂，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_42", seat: "42", name: "鐘蕓伸", wish: "蕓伸，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             
-            // 🌟 43 ~ 60 號隱藏版大星群彩蛋（支援未來直接在 wish 欄位塞出 <img> 圖片標籤） 🌟
+            // 🌟 43 ~ 60 號隱藏版彩蛋星群 🌟
             { id: "star_43", seat: "43", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 43 號神祕星體！\n你竟然連這裡都能搜到，看來有當工程師的潛力喔！" },
             { id: "star_44", seat: "44", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 44 號神祕星體！\n恭喜解鎖隱藏回憶，有找到其他同學的星星了嗎？" },
             { id: "star_45", seat: "45", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 45 號神祕星體！\n大驚喜！你抓到了一顆流星 🌠" },
             { id: "star_46", seat: "46", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 46 號神祕星體！\n看來 911 的棋手都很擅長探索宇宙呢！" },
             { id: "star_47", seat: "47", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 47 號神祕星體！\n彩蛋內容等生科老師想到更有趣的點子再塞進來！" },
-            { id: "star_48", seat: "48", name: "恭喜คุณ發現彩蛋了", wish: "✨ 這是第 48 號神祕星體！\n恭喜你發現宇宙隱藏的圍棋定式！" },
+            { id: "star_48", seat: "48", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 48 號神祕星體！\n恭喜你發現宇宙隱藏的圍棋定式！" },
             { id: "star_49", seat: "49", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 49 號神祕星體！\n距離滿星 60 顆不遠了，繼續尋寶吧！" },
             { id: "star_50", seat: "50", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 50 號神祕星體！\n達成了尋找彩蛋的里程碑！" },
             { id: "star_51", seat: "51", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 51 號神祕星體！\n這裡空空如也，只有滿滿的畢業祝福！" },
@@ -507,7 +504,7 @@
             }
 
             player.rotation.y = targetRotation;
-            camera.position.set(player.position.x, player.position.y + 13, player.position.z + 25);
+            camera.position.set(player.position.x, player.position.y + 9, player.position.z + 16);
             camera.lookAt(player.position);
 
             const now = performance.now();
@@ -518,8 +515,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        // 🚀 正式上線時間點設定（2026年6月9日晚上22:00大引爆）
-        const targetTime = new Date("June 7, 2026 23:55:00").getTime(); 
+        const targetTime = new Date("June 9, 2026 22:00:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -527,6 +523,11 @@
         let starSphereGroup = new THREE.Group(); scene.add(starSphereGroup);
         const spherePositions = []; const velocities = [];
         let gatherProgress = 0;
+
+        // 🎯 核心除錯補回點：補充全域遺漏的滑鼠追蹤與相機動畫旗標，徹底消滅 Uncaught ReferenceError
+        let isTrackingCamera = false; 
+        let camTargetPos = new THREE.Vector3();
+        let isUserInteracting = false;
 
         function updateTimeline() {
             if (blastStage > 0) return;
@@ -607,12 +608,11 @@
             }, 1500);
         }
 
-        // 階段二：打字機公告畫面（純打字效果完全不變動）
+        // 階段二：打字機公告畫面
         function startTypewriterEffect() {
             const screen = document.getElementById('typewriter-screen');
             const textBox = document.getElementById('typewriter-text');
             
-            // 🎯 防禦安全機制
             if (screen) screen.classList.remove('hidden');
             if (!textBox) return;
             
@@ -663,7 +663,6 @@
                 audioPiano.play().catch(e => console.log(e));
             }
 
-            // 🎯 為了解決多達 60 顆星高密度排開，將包圍半徑拉大到 24，視覺更震撼！
             graduationData.forEach((student, index) => {
                 const radius = 24; const u = Math.random(); const v = Math.random();
                 const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
@@ -682,9 +681,9 @@
             resetCamera();
         }
 
-        function resetCamera() { camera.position.set(0, 18, 55); camera.lookAt(0, 18, 0); }
+        function resetCamera() { camera.position.set(0, 18, 52); camera.lookAt(0, 18, 0); }
 
-        // 🎯 核心修改：建置全新的 HTML 高階發光 Modal 彈出視窗方法，並與 onClose 結合
+        // 🎯 核心控制：調用 HTML 霓虹發光燈箱
         function openCustomModal(titleText, bodyHtml) {
             document.getElementById('modal-title').innerHTML = titleText;
             document.getElementById('modal-body').innerHTML = bodyHtml;
@@ -697,7 +696,7 @@
 
         function searchMyStar() {
             const query = document.getElementById('search-input').value.trim().toLowerCase();
-            if(!query) return;
+            if(!query) return alert("請輸入座號或姓名！");
 
             const targetStar = starMeshes.find(star => {
                 const info = star.userData.studentInfo;
@@ -717,14 +716,15 @@
                 isTrackingCamera = true; isUserInteracting = true; 
 
                 setTimeout(() => {
-                    // 🎯 星球階段才在這邊觸發全新的霓虹發光 Modal
+                    // 星球激活後彈出高階發光圖文 Modal 視窗
                     openCustomModal(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟`, info.wish);
                     targetStar.scale.set(1, 1, 1); targetStar.material.color.setHex(0x00ff9d); targetStar.material.emissive.setHex(0x00ff9d);
                 }, 1500); 
-            } else { alert("找不到對應的同學或彩蛋座號喔！"); }
+            } else { alert("找不到對應的同學！"); }
         }
 
-        let isDragging = false; let prevMousePosition = { x: 0, y: 0 }; let isUserInteracting = false;
+        // 觸控與滑鼠拖曳控制
+        let isDragging = false; let prevMousePosition = { x: 0, y: 0 };
         function dragStart(x, y) { if(isTrackingCamera) return; isDragging = true; prevMousePosition = { x, y }; }
         function dragMove(x, y) {
             if (!isDragging || blastStage !== 4) return;
@@ -793,6 +793,7 @@
                 }
             }
 
+            // 🎯 這裡在追蹤插值鏡頭動畫時，變數已經完全解鎖，絕對不卡死！
             if (isTrackingCamera) {
                 camera.position.lerp(camTargetPos, 0.08); camera.lookAt(0, 18, 0);
             }
