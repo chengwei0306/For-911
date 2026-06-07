@@ -139,7 +139,7 @@
         <div id="typewriter-text"></div>
     </div>
 
-    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
+    <!-- <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button> -->
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
@@ -230,38 +230,38 @@
 
         // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
         const graduationData = [
-            { id: "star_01", seat: "01", name: "王群叡", wish: "畢業快樂🎉" },
-            { id: "star_03", seat: "03", name: "吳沁璇", wish: "畢業快樂🎉" },
-            { id: "star_04", seat: "04", name: "洪可芸", wish: "畢業快樂🎉" },
-            { id: "star_06", seat: "06", name: "陳俞瑾", wish: "畢業快樂🎉" },
-            { id: "star_07", seat: "07", name: "陳晏秦", wish: "畢業快樂🎉" },
-            { id: "star_08", seat: "08", name: "楊善茹", wish: "畢業快樂🎉" },
-            { id: "star_21", seat: "21", name: "丁日初", wish: "畢業快樂🎉" },
-            { id: "star_22", seat: "22", name: "王宥淵", wish: "畢業快樂🎉" },
-            { id: "star_23", seat: "23", name: "李宣毅", wish: "畢業快樂🎉" },
-            { id: "star_24", seat: "24", name: "林秉豫", wish: "畢業快樂🎉" },
-            { id: "star_25", seat: "25", name: "吳少珷", wish: "畢業快樂🎉" },
-            { id: "star_26", seat: "26", name: "林延宥", wish: "延宥！雖然只帶你半學期，但你的學習與吸收能力驚人。未來的路上保持這份自信，勇敢 Debug 你的人生藍圖吧！" },
-            { id: "star_27", seat: "27", name: "徐亦祺", wish: "畢業快樂🎉" },
-            { id: "star_28", seat: "28", name: "陳又嘉", wish: "畢業快樂🎉" },
-            { id: "star_29", seat: "29", name: "陳品聿", wish: "畢業快樂🎉" },
-            { id: "star_30", seat: "30", name: "陳彥希", wish: "畢業快樂🎉" },
-            { id: "star_31", seat: "31", name: "陳楷育", wish: "畢業快樂🎉" },
-            { id: "star_33", seat: "33", name: "陳俊穎", wish: "畢業快樂🎉" },
-            { id: "star_34", seat: "34", name: "陳謙維", wish: "畢業快樂🎉" },
-            { id: "star_35", seat: "35", name: "黃唯軒", wish: "畢業快樂🎉" },
-            { id: "star_36", seat: "36", name: "梁普恩", wish: "畢業快樂🎉" },
+            { id: "star_01", seat: "01", name: "王群叡", wish: "群叡，畢業快樂🎉" },
+            { id: "star_03", seat: "03", name: "吳沁璇", wish: "沁璇，畢業快樂🎉" },
+            { id: "star_04", seat: "04", name: "洪可芸", wish: "可芸，畢業快樂🎉" },
+            { id: "star_06", seat: "06", name: "陳俞瑾", wish: "俞瑾，畢業快樂🎉" },
+            { id: "star_07", seat: "07", name: "陳晏秦", wish: "晏秦，畢業快樂🎉" },
+            { id: "star_08", seat: "08", name: "楊善茹", wish: "善茹，畢業快樂🎉" },
+            { id: "star_21", seat: "21", name: "丁日初", wish: "日初，畢業快樂🎉" },
+            { id: "star_22", seat: "22", name: "王宥淵", wish: "宥淵，畢業快樂🎉" },
+            { id: "star_23", seat: "23", name: "李宣毅", wish: "宣毅，畢業快樂🎉" },
+            { id: "star_24", seat: "24", name: "林秉豫", wish: "秉豫，畢業快樂🎉" },
+            { id: "star_25", seat: "25", name: "吳少珷", wish: "少珷，畢業快樂🎉" },
+            { id: "star_26", seat: "26", name: "林延宥", wish: "延宥！雖然只帶你半學期，但你的學習與吸收能力很優秀是個不可多得的人才。未來的路上保持這份自信、勇敢，開創屬於你的人生藍圖！" },
+            { id: "star_27", seat: "27", name: "徐亦祺", wish: "亦祺，畢業快樂🎉" },
+            { id: "star_28", seat: "28", name: "陳又嘉", wish: "又嘉，畢業快樂🎉" },
+            { id: "star_29", seat: "29", name: "陳品聿", wish: "品聿，畢業快樂🎉" },
+            { id: "star_30", seat: "30", name: "陳彥希", wish: "彥希，畢業快樂🎉" },
+            { id: "star_31", seat: "31", name: "陳楷育", wish: "楷育，畢業快樂🎉" },
+            { id: "star_33", seat: "33", name: "陳俊穎", wish: "俊穎，畢業快樂🎉" },
+            { id: "star_34", seat: "34", name: "陳謙維", wish: "謙維，畢業快樂🎉" },
+            { id: "star_35", seat: "35", name: "黃唯軒", wish: "唯軒，畢業快樂🎉" },
+            { id: "star_36", seat: "36", name: "梁普恩", wish: "普恩，畢業快樂🎉" },
             { id: "star_37", seat: "37", name: "許洺齊", wish: "洺齊！這段時間看見你的成長，老師真的覺得你是有潛力的一顆星。記住，你的大腦核心處理器非常強大，相信自己，未來必定大放異彩！" },
-            { id: "star_38", seat: "38", name: "蔡易辰", wish: "易辰！人生不要害怕遭遇 Compile Error，每一次的挫折與挑戰，都是讓你系統變得更完美的優化擴充。祝你未來一路順暢！" },
-            { id: "star_39", seat: "39", name: "楊予寬", wish: "畢業快樂🎉" },
-            { id: "star_40", seat: "40", name: "楊淞賁", wish: "畢業快樂🎉" },
-            { id: "star_41", seat: "41", name: "劉品樂", wish: "畢業快樂🎉" },
-            { id: "star_42", seat: "42", name: "鐘蕓伸", wish: "畢業快樂🎉" }
+            { id: "star_38", seat: "38", name: "蔡易辰", wish: "易辰！人生不要害怕遭遇 Error，每一次的挫折與挑戰，都是讓你人生系統變得更完美更優秀。祝你未來遇到挫折，都能迎刃而解！" },
+            { id: "star_39", seat: "39", name: "楊予寬", wish: "予寬，畢業快樂🎉" },
+            { id: "star_40", seat: "40", name: "楊淞賁", wish: "淞賁，畢業快樂🎉" },
+            { id: "star_41", seat: "41", name: "劉品樂", wish: "品樂，畢業快樂🎉" },
+            { id: "star_42", seat: "42", name: "鐘蕓伸", wish: "蕓伸，畢業快樂🎉" }
         ];
 
         const pCount = graduationData.length; 
 
-        const teacherSpeech = "⚡ [911 核心通訊已連接]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，\n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的優化契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n——＠chengwei_2232 \n2026.06.09";
+        const teacherSpeech = "⚡ [911 核心通訊已連接]...\n\n落子無悔，青春亦然。\n雖然只帶了你們短短半學期，然後一些人請假所以我們有點不熟哈哈哈 \n但你們這群小棋手的智慧與活力，已經寫進了我的核心記憶體中。\n\n人生這場大棋局，難免會遇到困境或落後，\n但請記住，每一次被圍攻的 Bug，都是逼你們系統覺醒的契機。\n\n勇敢地去開創屬於你們自己的不敗定式吧！\n畢業快樂！\n\n—— 生科老師 柯承濰 \n—— ＠chengwei_2232 \n2026.06.09";
 
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
