@@ -23,21 +23,20 @@
             transition: background 0.5s ease;
         }
 
-        /* 🎯 右上角發光音樂控制按鈕 */
+        /* 🎯 右上角極簡圓形音樂按鈕 */
         #audio-toggle-btn {
             position: absolute; top: 20px; right: 20px; z-index: 1000;
-            background: rgba(10, 10, 25, 0.85); color: #00ff9d;
-            border: 2px solid #00ff9d; padding: 10px 18px;
-            font-size: 14px; font-weight: bold; font-family: monospace, "Microsoft JhengHei";
-            border-radius: 30px; cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
+            background: rgba(10, 10, 25, 0.85); color: #ff007f;
+            border: 2px solid #ff007f; width: 45px; height: 45px;
+            font-size: 18px; font-weight: bold; border-radius: 50%; cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
             transition: all 0.3s ease;
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; justify-content: center;
+            outline: none;
         }
         #audio-toggle-btn:hover {
-            background: #00ff9d; color: #000;
-            box-shadow: 0 0 25px #00ff9d;
-            transform: scale(1.05);
+            box-shadow: 0 0 25px #ff007f;
+            transform: scale(1.08);
         }
 
         /* 全螢幕打字機黑客幕 */
@@ -134,20 +133,20 @@
     <canvas id="webgl-stage"></canvas>
     <div id="sky-mask"></div>
 
-    <button id="audio-toggle-btn" onclick="toggleAudioSystem()">🎵 啟動音效通道</button>
+    <button id="audio-toggle-btn" onclick="toggleAudioSystem()">🎵</button>
 
     <div id="typewriter-screen" class="hidden">
         <div id="typewriter-text"></div>
     </div>
 
-    <!-- <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button> -->
+    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
 
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
             🌐 正在建立 911 圍棋元宇宙安全連線...
         </div>
         <div class="timer-box" id="timer-box">
-            距離校園記憶崩塌還有：<span id="countdown">00:00:00</span>
+            距離記憶棋局大爆炸還有：<span id="countdown">00:00:00</span>
         </div>
     </div>
 
@@ -166,35 +165,66 @@
         const audioTicking = new Audio('ticking.mp3'); audioTicking.loop = true; audioTicking.volume = 0.4;
         const audioPiano = new Audio('bgm_piano.mp3'); audioPiano.loop = true; audioPiano.volume = 0.7;
 
-        let isTickingPlaying = false; 
-        let isAudioPlaying = false; // 記錄目前音樂是開啟還是靜音狀態
-        
+        let isTickingPlaying = false;
+        let isAudioPlaying = true;    // 預設設定為「開啟音樂」狀態
+        let isAudioUnlocked = false;   // 標記音訊通道是否已被解鎖放行
+
         // === 0.0 進入網頁前問姓名座號 ===
         let myUsername = prompt("【911 限定】請輸入你的座號或名字或綽號", "");
         if(!myUsername || myUsername.trim() === "") {
             myUsername = "棋手_" + Math.floor(Math.random() * 900 + 100);
         }
 
-        // 🎯 右上角按鈕系統核心控制器
+        // 🎯 全域自動啟動播放器
+        function autoStartAudioSystem() {
+            if (!isAudioUnlocked && isAudioPlaying) {
+                isAudioUnlocked = true;
+                if (blastStage === 0) {
+                    audioWorld.play().catch(e => console.log("等待放行:", e));
+                    if (isTickingPlaying) audioTicking.play().catch(e => console.log(e));
+                } else {
+                    audioPiano.play().catch(e => console.log(e));
+                }
+                updateAudioButtonUI(true);
+                window.removeEventListener('click', autoStartAudioSystem);
+                window.removeEventListener('touchstart', autoStartAudioSystem);
+            }
+        }
+        window.addEventListener('click', autoStartAudioSystem);
+        window.addEventListener('touchstart', autoStartAudioSystem, { passive: true });
+
+        // 🎯 右上角極簡按鈕手動控制切換
         function toggleAudioSystem() {
-            const btn = document.getElementById('audio-toggle-btn');
             if (!isAudioPlaying) {
+                isAudioPlaying = true;
+                isAudioUnlocked = true; 
                 if (blastStage === 0) {
                     audioWorld.play().catch(e => console.log(e));
                     if (isTickingPlaying) audioTicking.play().catch(e => console.log(e));
                 } else {
                     audioPiano.play().catch(e => console.log(e));
                 }
-                isAudioPlaying = true;
-                btn.innerHTML = "🔊 靜音音樂";
-                btn.style.borderColor = "#ff007f"; btn.style.color = "#ff007f";
-                btn.style.boxShadow = "0 0 15px rgba(255, 0, 127, 0.3)";
+                updateAudioButtonUI(true);
             } else {
                 audioWorld.pause(); audioTicking.pause(); audioPiano.pause();
                 isAudioPlaying = false;
-                btn.innerHTML = "🎵 開啟音樂";
-                btn.style.borderColor = "#00ff9d"; btn.style.color = "#00ff9d";
-                btn.style.boxShadow = "0 0 15px rgba(0, 255, 157, 0.3)";
+                updateAudioButtonUI(false);
+            }
+        }
+
+        // 🎯 極簡圖示與外觀切換控制
+        function updateAudioButtonUI(isPlaying) {
+            const btn = document.getElementById('audio-toggle-btn');
+            if (btn) {
+                if (isPlaying) {
+                    btn.innerHTML = "🎵"; // 播放中顯示五線譜
+                    btn.style.borderColor = "#ff007f"; btn.style.color = "#ff007f";
+                    btn.style.boxShadow = "0 0 15px rgba(255, 0, 127, 0.3)";
+                } else {
+                    btn.innerHTML = "🔇"; // 靜音中顯示靜音符號
+                    btn.style.borderColor = "#00ff9d"; btn.style.color = "#00ff9d";
+                    btn.style.boxShadow = "0 0 15px rgba(0, 255, 157, 0.3)";
+                }
             }
         }
 
@@ -236,7 +266,6 @@
         // === 1. 初始化 3D 場景 ===
         const scene = new THREE.Scene();
         
-        // 載入大安國中新大樓背景
         const textureLoader = new THREE.TextureLoader();
         textureLoader.load('daan.jpeg', function(texture) {
             if(blastStage === 0) scene.background = texture; 
@@ -387,8 +416,7 @@
         });
         pubnub.subscribe({ channels: ['class_911_metaverse'], withPresence: true });
 
-        // 導引公告欄換行與點擊提示排版
-        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間<br>🌐 已建立 911 元宇宙安全連線... (🎵 <b>請點右上方啟動音效</b>)<br>按下 WASD 或 滑動搖桿 可以自由移動`;
+        document.getElementById('announcement').innerHTML = `歡迎 <b>${myUsername}</b> 進入911元宇宙空間<br>🌐 已建立 911 圍棋元宇宙安全連線...<br>按下 WASD 或 滑動搖桿 可以自由移動`;
 
         // === 5. 移動控制系統 ===
         const keys = { w:0, a:0, s:0, d:0 };
@@ -436,7 +464,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        const targetTime = new Date("June 7, 2026 23:13:00").getTime(); 
+        const targetTime = new Date("June 7, 2026 23:20:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -467,7 +495,7 @@
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             document.getElementById('countdown').innerText = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
             
-            // 🎯 【優化滴答音樂】：如果目前為開啟音樂狀態，最後15秒內自動淡入滴答音效
+            // 🎯 倒數 15 秒自動切入滴答音效
             if (hours === 0 && minutes === 0 && distance <= 15000 && distance > 0) {
                 if (!isTickingPlaying) {
                     isTickingPlaying = true;
@@ -484,12 +512,10 @@
             if(blastStage > 0) return;
             blastStage = 1;
             
-            // 🎯 【優化大爆炸音軌切換】：若目前音樂處於播放狀態，切換至沉重鋼琴樂
             if (isAudioPlaying) {
-                audioWorld.pause();
-                audioTicking.pause();
+                audioWorld.pause(); audioTicking.pause();
                 audioPiano.play().catch(e => console.log(e));
-                document.getElementById('audio-toggle-btn').innerHTML = "🔊 靜音音樂";
+                updateAudioButtonUI(true);
             }
 
             document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`;
@@ -557,31 +583,22 @@
         // 階段四：記憶星球高階互動
         const starMeshes = [];
         function buildMemorySphere() {
-            blastStage = 4; // 確保強制跳關時狀態正確被同步
+            blastStage = 4; 
             starSphereGroup.position.set(0, 18, 0);
             document.getElementById('announcement').innerHTML = "✨【911 記憶星球】凝聚重構成功！<br>👉 下方輸入『座號』或『姓名』，自動 3D 定位你的棋局回憶之星！";
 
-            // 🎯【重磅修復核心】：不論是從倒數進來的，還是重新整理跳關進來的，一律強制用純黑深邃宇宙洗掉大安國中背景圖！
             scene.background = new THREE.Color(0x020206);
-            document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0fixed)`; 
-            document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`; // 破除黑網
+            document.getElementById('sky-mask').style.background = `rgba(0, 0, 0, 0)`; 
             
-            // 同步隱藏一開始的走路UI與倒數計時框，防範跳關穿幫
             document.getElementById('timer-box').classList.add('hidden');
             document.getElementById('joystick-zone').classList.add('hidden');
             if(document.getElementById('test-btn')) document.getElementById('test-btn').classList.add('hidden');
             
-            // 移除可能殘留在場景中的第一階段物件（如：圍棋地面、出生圓台、落下的巨大棋子）
-            scene.remove(floor); 
-            scene.remove(centerPlatform); 
-            scene.remove(player); 
-            scene.remove(stoneGroup);
+            scene.remove(floor); scene.remove(centerPlatform); scene.remove(player); scene.remove(stoneGroup);
             for (let id in otherPlayers) { scene.remove(otherPlayers[id]); }
 
-            // 🎯【顯示搜尋框修正】：確保搜尋框重見天日
             document.getElementById('search-container').classList.remove('hidden');
 
-            // 🎯【防跳關沒聲音核心】：如果跳關進來且按鈕是開啟狀態，確保播放沉重鋼琴樂
             if (isAudioPlaying && audioPiano.paused) {
                 audioPiano.play().catch(e => console.log(e));
             }
@@ -632,7 +649,7 @@
             } else { alert("找不到對應的同學！"); }
         }
 
-        // 觸控拖曳控制
+        // 觸控拖曳
         let isDragging = false; let prevMousePosition = { x: 0, y: 0 }; let isUserInteracting = false;
         function dragStart(x, y) { if(isTrackingCamera) return; isDragging = true; prevMousePosition = { x, y }; }
         function dragMove(x, y) {
