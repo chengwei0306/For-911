@@ -327,6 +327,8 @@
         scene.fog = new THREE.FogExp2(0x020206, 0.012);
 
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 13, 25); 
+        camera.lookAt(0, 0, 0);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-stage'), antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -515,7 +517,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        const targetTime = new Date("June 7, 2026 23:58:00").getTime(); 
+        const targetTime = new Date("June 8, 2026 00:09:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -670,7 +672,7 @@
                 const sy = radius * Math.sin(phi) * Math.sin(theta);
                 const sz = radius * Math.cos(phi);
 
-                const starGeo = new THREE.IcosahedronGeometry(0.7, 0); 
+                const starGeo = new THREE.IcosahedronGeometry(1.4, 0); 
                 const starMat = new THREE.MeshStandardMaterial({ color: 0x00ff9d, emissive: 0x00ff9d, emissiveIntensity: 0.8, roughness: 0.1 });
                 const mesh = new THREE.Mesh(starGeo, starMat);
                 mesh.position.set(sx, sy, sz);
@@ -717,10 +719,10 @@
 
                 setTimeout(() => {
                     // 星球激活後彈出高階發光圖文 Modal 視窗
-                    openCustomModal(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟`, info.wish);
+                    openCustomModal(`🌟【${info.seat} ${info.name} 的回憶結晶】🌟`, info.wish);
                     targetStar.scale.set(1, 1, 1); targetStar.material.color.setHex(0x00ff9d); targetStar.material.emissive.setHex(0x00ff9d);
                 }, 1500); 
-            } else { alert("找不到對應的同學！"); }
+            } else { alert("找不到對應的回憶！"); }
         }
 
         // 觸控與滑鼠拖曳控制
