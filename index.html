@@ -39,7 +39,7 @@
             transform: scale(1.08);
         }
 
-        /* 🎯 核心修改：全新科技風發光圖文彈出視窗 CSS */
+        /* 全新科技風發光圖文彈出視窗 CSS */
         #custom-modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
             z-index: 2000; width: 85%; max-width: 420px;
@@ -171,14 +171,12 @@
         <button id="modal-close-btn" onclick="closeCustomModal()">CLOSE</button>
     </div>
 
-    <button id="test-btn" onclick="triggerMemoryBlast()">💥 測試直接引爆（看煙火與星球）</button>
-
     <div id="ui-container">
         <div class="system-announcement" id="announcement">
             🌐 正在建立 911 圍棋元宇宙安全連線...
         </div>
         <div class="timer-box" id="timer-box">
-            距離記憶棋局大爆炸還有：<span id="countdown">00:00:00</span>
+            距離校園記憶崩塌還有：<span id="countdown">00:00:00</span>
         </div>
     </div>
 
@@ -189,6 +187,10 @@
 
     <div id="joystick-zone">
         <div id="joystick-stick"></div>
+    </div>
+
+    <div id="typewriter-screen" class="hidden">
+        <div id="typewriter-text"></div>
     </div>
 
     <script>
@@ -257,7 +259,7 @@
             }
         }
 
-        // === 0.1 911 畢業班級名單與專屬祝福資料庫（內建 60 顆星與新祝詞） ===
+        // === 0.1 911 畢業班級名單與專屬祝福資料庫 ===
         const graduationData = [
             { id: "star_01", seat: "01", name: "王群叡", wish: "群叡，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_03", seat: "03", name: "吳沁璇", wish: "沁璇，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
@@ -287,7 +289,7 @@
             { id: "star_41", seat: "41", name: "劉品樂", wish: "品樂，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             { id: "star_42", seat: "42", name: "鐘蕓伸", wish: "蕓伸，畢業快樂🎉\n生科老師 柯承濰\n＠chengwei_2232" },
             
-            // 🌟 43 ~ 60 號隱藏版彩蛋星群（wish 欄位可自由塞入 <img> 標籤） 🌟
+            // 🌟 43 ~ 60 號隱藏版彩蛋星群 🌟
             { id: "star_43", seat: "43", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 43 號神祕星體！\n你竟然連這裡都能搜到，看來有當工程師的潛力喔！" },
             { id: "star_44", seat: "44", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 44 號神祕星體！\n恭喜解鎖隱藏回憶，有找到其他同學的星星了嗎？" },
             { id: "star_45", seat: "45", name: "恭喜你發現彩蛋了", wish: "✨ 這是第 45 號神祕星體！\n大驚喜！你抓到了一顆流星 🌠" },
@@ -480,7 +482,7 @@
             const rect = joystickZone.getBoundingClientRect(); const touch = e.touches[0];
             let fx = touch.clientX - (rect.left + 55); let fy = touch.clientY - (rect.top + 55);
             const dist = Math.sqrt(fx*fx + fy*fy);
-            if(dist > 35) { fx = (fx/dist)*35; fy = (dist/35)*35; }
+            if(dist > 35) { fx = (fx/dist)*35; fy = (fy/dist)*35; }
             joystickStick.style.transform = `translate(${fx}px, ${fy}px)`;
             moveDir.x = fx / 35; moveDir.z = fy / 35;
         }, { passive: true });
@@ -513,7 +515,8 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        const targetTime = new Date("June 7, 2026 23:42:00").getTime(); 
+        // 🚀 正式上線大爆炸時間設定點
+        const targetTime = new Date("June 7, 2026 23:48:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -605,8 +608,13 @@
         function startTypewriterEffect() {
             const screen = document.getElementById('typewriter-screen');
             const textBox = document.getElementById('typewriter-text');
-            screen.classList.remove('hidden');
             
+            // 🎯 【除錯安全閘】：先判斷 DOM 節點是否存在，防範 classList 讀取 null 的 Bug
+            if (screen) {
+                screen.classList.remove('hidden');
+            }
+            
+            if (!textBox) return; // 防呆安全退出
             let index = 0; textBox.innerText = "";
             
             function type() {
@@ -616,9 +624,12 @@
                     setTimeout(type, 80); 
                 } else {
                     setTimeout(() => {
-                        screen.style.transition = "opacity 1s ease"; screen.style.opacity = 0;
+                        if (screen) {
+                            screen.style.transition = "opacity 1s ease"; 
+                            screen.style.opacity = 0;
+                        }
                         setTimeout(() => {
-                            screen.classList.add('hidden');
+                            if (screen) screen.classList.add('hidden');
                             blastStage = 3; 
                             document.getElementById('announcement').innerHTML = "✨ 【重力引力逆轉】破碎的回憶正緩緩凝聚為星球...";
                         }, 1000);
@@ -651,7 +662,6 @@
                 audioPiano.play().catch(e => console.log(e));
             }
 
-            // 🎯 為了解決 60 顆星高密度排開，將包圍半徑拉大到 24，視覺更震撼！
             graduationData.forEach((student, index) => {
                 const radius = 24; const u = Math.random(); const v = Math.random();
                 const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
@@ -672,9 +682,6 @@
 
         function resetCamera() { camera.position.set(0, 18, 55); camera.lookAt(0, 18, 0); }
 
-        let isTrackingCamera = false; let camTargetPos = new THREE.Vector3();
-
-        // 🎯 核心修改：將原本純文字的 alert 升級成網頁圖文 Modal 發光視窗！
         function openCustomModal(titleText, bodyHtml) {
             document.getElementById('modal-title').innerHTML = titleText;
             document.getElementById('modal-body').innerHTML = bodyHtml;
@@ -707,14 +714,12 @@
                 isTrackingCamera = true; isUserInteracting = true; 
 
                 setTimeout(() => {
-                    // 呼叫全新的圖文視窗
                     openCustomModal(`🌟【911 ${info.seat} ${info.name} 的回憶結晶】🌟`, info.wish);
                     targetStar.scale.set(1, 1, 1); targetStar.material.color.setHex(0x00ff9d); targetStar.material.emissive.setHex(0x00ff9d);
                 }, 1500); 
             } else { alert("找不到對應的同學或彩蛋座號喔！"); }
         }
 
-        // 觸控拖曳
         let isDragging = false; let prevMousePosition = { x: 0, y: 0 }; let isUserInteracting = false;
         function dragStart(x, y) { if(isTrackingCamera) return; isDragging = true; prevMousePosition = { x, y }; }
         function dragMove(x, y) {
