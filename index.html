@@ -521,7 +521,7 @@
         }
 
         // === 6. 排程時間與天色變黑遮罩系統 ===
-        const targetTime = new Date("June 8, 2026 00:09:00").getTime(); 
+        const targetTime = new Date("June 8, 2026 00:40:00").getTime(); 
         const duskStartTime = new Date("June 9, 2026 21:30:00").getTime();
 
         let blastStage = 0; 
@@ -715,7 +715,7 @@
                 targetStar.getWorldPosition(worldPos);
 
                 const direction = new THREE.Vector3().subVectors(worldPos, new THREE.Vector3(0, 18, 0)).normalize();
-                camTargetPos.copy(worldPos).add(direction.multiplyScalar(10)); 
+                camTargetPos.copy(worldPos).add(direction.multiplyScalar(14)); 
 
                 targetStar.material.color.setHex(0xff007f); targetStar.material.emissive.setHex(0xff007f);
                 targetStar.scale.set(2.5, 2.5, 2.5);
